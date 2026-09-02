@@ -540,7 +540,7 @@ th{color:#8f9ba7}
   </div>
 
   <h4 style="margin:24px 0 10px;color:var(--gold2)">عقارات تحت المراجعة</h4>
-  <div class="tablewrap"><table><thead><tr><th>العقار</th><th>المنطقة</th><th>السعر</th><th></th></tr></thead><tbody id="reviewTable"></tbody></table></div>
+  <div class="tablewrap"><table><thead><tr><th>العقار</th><th>المنطقة</th><th>السعر</th><th>المراجعة</th></tr></thead><tbody id="reviewTable"></tbody></table></div>
 
   <h4 style="margin:24px 0 10px;color:var(--gold2)">تنبيهات مطابقة جديدة</h4>
   <div class="tablewrap"><table><thead><tr><th>العميل</th><th>الهاتف</th><th>العقار المطابق</th><th>نسبة التطابق</th><th>التاريخ</th><th></th></tr></thead><tbody id="notifTable"></tbody></table></div>
@@ -607,6 +607,35 @@ th{color:#8f9ba7}
 </div></div>
 
 
+<div class="modal" id="submissionReviewModal"><div class="modal-box" style="width:min(980px,100%)">
+  <div class="modal-head"><h3>معاينة العقار قبل الاعتماد</h3><button class="close" onclick="closeModal('submissionReviewModal')">✕</button></div>
+  <div id="submissionReviewBody"></div>
+</div></div>
+
+<div class="modal" id="rejectSubmissionModal"><div class="modal-box" style="width:min(620px,100%)">
+  <div class="modal-head"><h3>رفض العقار</h3><button class="close" onclick="closeModal('rejectSubmissionModal')">✕</button></div>
+  <input type="hidden" id="rejectSubmissionId">
+  <div class="field">
+    <label>سبب الرفض</label>
+    <select id="rejectReason">
+      <option value="">اختر السبب</option>
+      <option value="بيانات العقار غير مكتملة">بيانات العقار غير مكتملة</option>
+      <option value="الصور غير كافية أو غير مناسبة">الصور غير كافية أو غير مناسبة</option>
+      <option value="بيانات المالك تحتاج مراجعة">بيانات المالك تحتاج مراجعة</option>
+      <option value="العقار مكرر">العقار مكرر</option>
+      <option value="السعر أو البيانات تحتاج تصحيح">السعر أو البيانات تحتاج تصحيح</option>
+      <option value="other">سبب آخر</option>
+    </select>
+  </div>
+  <div class="field">
+    <label>ملاحظة إضافية</label>
+    <textarea id="rejectNote" rows="4" placeholder="اكتب التفاصيل عند الحاجة"></textarea>
+  </div>
+  <button class="btn gold" style="width:100%" onclick="confirmRejectSubmission()">تأكيد رفض العقار</button>
+</div></div>
+
+
+<!-- ENWANAK V8.6: Admin full review + reject reason + curated Cairo areas -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
 import {
@@ -713,6 +742,15 @@ window.ENW_DB = {
     await deleteDoc(doc(db,"propertySubmissions",sub._docId||sub.submissionId));
     return publicProperty;
   },
+  async rejectSubmission(submissionId,reason,note=""){
+    await setDoc(doc(db,"propertySubmissions",submissionId),clean({
+      status:"rejected",
+      rejectionReason:reason,
+      rejectionNote:note,
+      rejectedAt:new Date().toISOString(),
+      rejectedBy:auth.currentUser?.email||ADMIN_EMAIL
+    }),{merge:true});
+  },
   async updateProperty(p){ await setDoc(doc(db,"properties",p.id),clean(p),{merge:true}); },
   async saveDeal(deal){ await setDoc(doc(db,"deals",deal.id),clean(deal)); },
   async saveTimeline(propertyId,items){ await setDoc(doc(db,"timelines",propertyId),{items}); },
@@ -776,7 +814,7 @@ let egyptGovernorates = [...DEFAULT_EGYPT_GOVERNORATES];
 // Cairo has the current launch-area catalogue. Other governorates can accept a typed city/area
 // without changing the property data structure later.
 const DEFAULT_AREAS_BY_GOVERNORATE = {
-  "القاهرة": ["العاصمة الإدارية الجديدة", "التجمع الخامس", "القاهرة الجديدة", "التجمع الأول", "التجمع الثالث", "النرجس", "اللوتس", "الأندلس", "بيت الوطن", "المستثمرين الشمالية", "المستثمرين الجنوبية", "الياسمين", "البنفسج", "الرحاب", "مدينتي", "مدينة نصر", "الحي الأول - مدينة نصر", "الحي السادس - مدينة نصر", "الحي السابع - مدينة نصر", "الحي الثامن - مدينة نصر", "الحي العاشر - مدينة نصر", "زهراء مدينة نصر", "مصر الجديدة", "روكسي", "الكوربة", "أرض الجولف", "هليوبوليس", "النزهة", "شيراتون", "الماظة", "المعادي", "دجلة المعادي", "سرايات المعادي", "زهراء المعادي", "المعراج", "حدائق المعادي", "طرة", "كوتسيكا", "المقطم", "الهضبة العليا", "الهضبة الوسطى", "الهضبة السفلى", "الأشجار", "الأسمرات", "الزمالك", "جاردن سيتي", "وسط البلد", "قصر النيل", "باب اللوق", "المنيرة", "السيدة زينب", "القلعة", "الخليفة", "الحسين", "الجمالية", "الدرب الأحمر", "الأزهر", "العباسية", "الظاهر", "الوايلي", "حدائق القبة", "الزيتون", "حلمية الزيتون", "الأميرية", "الشرابية", "روض الفرج", "شبرا", "الساحل", "عين شمس", "المطرية", "المرج", "عزبة النخل", "السلام", "النهضة", "مدينة السلام", "الشروق", "بدر", "هليوبوليس الجديدة", "حلوان", "المعصرة", "حدائق حلوان", "وادي حوف", "عين حلوان", "التبين", "15 مايو", "منشأة ناصر", "دار السلام", "البساتين"],
+  "القاهرة": ["القاهرة الجديدة", "التجمع الخامس", "الرحاب", "مدينتي", "مدينة نصر", "مصر الجديدة", "المعادي", "المقطم", "وسط البلد", "الزمالك", "جاردن سيتي", "الشروق", "بدر", "العاصمة الإدارية الجديدة", "6 أكتوبر", "الشيخ زايد"],
   "الإسكندرية": [],
   "الجيزة": [],
   "القليوبية": [],
@@ -807,6 +845,15 @@ const DEFAULT_AREAS_BY_GOVERNORATE = {
 let areasByGovernorate = JSON.parse(JSON.stringify(DEFAULT_AREAS_BY_GOVERNORATE));
 // Ensure every governorate has an area catalogue and persist admin-added locations.
 egyptGovernorates.forEach(g=>{ if(!Array.isArray(areasByGovernorate[g])) areasByGovernorate[g]=[]; });
+
+const CURATED_CAIRO_AREAS = ["القاهرة الجديدة","التجمع الخامس","الرحاب","مدينتي","مدينة نصر","مصر الجديدة","المعادي","المقطم","وسط البلد","الزمالك","جاردن سيتي","الشروق","بدر","العاصمة الإدارية الجديدة","6 أكتوبر","الشيخ زايد"];
+function normalizeCairoAreas(){
+  const current=areasByGovernorate["القاهرة"];
+  if(!Array.isArray(current) || current.length>24){
+    areasByGovernorate["القاهرة"]=[...CURATED_CAIRO_AREAS];
+  }
+}
+normalizeCairoAreas();
 
 const cairoAreas = areasByGovernorate["القاهرة"]; // legacy compatibility
 
@@ -1593,6 +1640,69 @@ async function approveProperty(id){
   }catch(e){ console.error(e); alert("تعذر اعتماد العقار في Firebase."); }
 }
 
+function submissionTxLabel(v){ return v==="rent"?"إيجار":"بيع"; }
+function submissionKindLabel(v){ return v==="admin"?"إداري":"سكني"; }
+
+function openSubmissionReview(id){
+  const sub=pendingSubmissions.find(x=>(x._docId||x.submissionId)===id); if(!sub)return;
+  const imgs=(Array.isArray(sub.imageUrls)&&sub.imageUrls.length?sub.imageUrls:(Array.isArray(sub.gallery)?sub.gallery:[])).filter(Boolean);
+  const body=document.getElementById("submissionReviewBody");
+  body.innerHTML=`
+    ${imgs.length?`
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-bottom:16px">
+        ${imgs.map(u=>`<img src="${esc(u)}" alt="صورة العقار" style="width:100%;height:190px;object-fit:cover;border-radius:14px;border:1px solid var(--line)">`).join("")}
+      </div>`:`<div class="note">لا توجد صور مرفوعة لهذا العقار.</div>`}
+    <div class="property-summary" style="padding:16px">
+      <h2 style="font-size:22px">${esc(sub.title||"بدون عنوان")}</h2>
+      <div class="detail-price">${money(Number(sub.price||0))} ج.م</div>
+      <div class="detail-grid">
+        <div class="detail-item"><span>رقم الطلب</span><b>${esc(sub.submissionId||sub._docId||"")}</b></div>
+        <div class="detail-item"><span>نوع العملية</span><b>${submissionTxLabel(sub.tx)}</b></div>
+        <div class="detail-item"><span>التصنيف</span><b>${submissionKindLabel(sub.kind)}</b></div>
+        <div class="detail-item"><span>نوع الوحدة</span><b>${esc(sub.type||"—")}</b></div>
+        <div class="detail-item"><span>المحافظة</span><b>${esc(sub.governorate||"القاهرة")}</b></div>
+        <div class="detail-item"><span>المنطقة</span><b>${esc(sub.area||"—")}</b></div>
+        <div class="detail-item"><span>المساحة</span><b>${money(Number(sub.size||0))} م²</b></div>
+        <div class="detail-item"><span>تاريخ التسجيل</span><b>${displayDate(sub.createdAt)||esc(sub.createdAt||"—")}</b></div>
+        <div class="detail-item"><span>اسم المالك</span><b>${esc(sub.ownerName||"—")}</b></div>
+        <div class="detail-item"><span>هاتف المالك</span><b dir="ltr">${esc(sub.ownerPhone||"—")}</b></div>
+      </div>
+      <div class="detail-item" style="margin-top:10px"><span>وصف العقار</span><b style="white-space:normal;line-height:1.8">${esc(sub.description||"لا يوجد وصف")}</b></div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px">
+        <button class="btn gold" style="flex:1;min-width:160px" onclick="approveFromReview('${esc(id)}')">اعتماد العقار</button>
+        <button class="btn ghost" style="flex:1;min-width:160px;border-color:rgba(216,92,92,.45);color:#f2b0b0" onclick="openRejectSubmission('${esc(id)}')">رفض العقار</button>
+      </div>
+    </div>`;
+  openModal("submissionReviewModal");
+}
+
+async function approveFromReview(id){
+  closeModal("submissionReviewModal");
+  await approveProperty(id);
+}
+
+function openRejectSubmission(id){
+  document.getElementById("rejectSubmissionId").value=id;
+  document.getElementById("rejectReason").value="";
+  document.getElementById("rejectNote").value="";
+  closeModal("submissionReviewModal");
+  openModal("rejectSubmissionModal");
+}
+
+async function confirmRejectSubmission(){
+  const id=document.getElementById("rejectSubmissionId").value;
+  const selected=document.getElementById("rejectReason").value;
+  const note=document.getElementById("rejectNote").value.trim();
+  const reason=selected==="other"?(note||"سبب آخر"):selected;
+  if(!id||!reason){ alert("اختر سبب الرفض أو اكتب السبب."); return; }
+  try{
+    await window.ENW_DB.rejectSubmission(id,reason,note);
+    closeModal("rejectSubmissionModal");
+    await loadAdminDashboard();
+    alert("تم رفض العقار وحفظ سبب الرفض في Firebase.");
+  }catch(e){ console.error(e); alert("تعذر حفظ قرار الرفض."); }
+}
+
 
 async function persistLocationCatalog(){
   if(!adminSignedIn) return;
@@ -1661,11 +1771,12 @@ async function loadAdminDashboard(){
   if(!window.ENW_DB?.currentUser()) return;
   const data=await window.ENW_DB.loadAdminData();
   properties=(data.properties||[]).map(p=>({...p,governorate:p.governorate||"القاهرة"}));
-  pendingSubmissions=data.submissions||[]; requests=data.requests||[]; leads=data.leads||[]; deals=data.deals||[];
+  pendingSubmissions=(data.submissions||[]).filter(s=>(s.status||"review")==="review"); requests=data.requests||[]; leads=data.leads||[]; deals=data.deals||[];
   timelines=data.timelines||{}; notifications=data.notifications||[];
   if(data.locations?.governorates?.length){
     egyptGovernorates=data.locations.governorates; areasByGovernorate=data.locations.areas||areasByGovernorate;
     egyptGovernorates.forEach(g=>{if(!Array.isArray(areasByGovernorate[g])) areasByGovernorate[g]=[];});
+    normalizeCairoAreas();
     refreshAllLocationSelects();
   }
   const st=document.getElementById("firebaseStatus"); if(st) st.textContent=`Firebase متصل — الإدارة مسجلة باسم ${window.ENW_DB.currentUser().email}`;
@@ -1680,6 +1791,7 @@ async function bootstrapENWANAK(){
     if(catalog?.governorates?.length){
       egyptGovernorates=catalog.governorates; areasByGovernorate=catalog.areas||areasByGovernorate;
       egyptGovernorates.forEach(g=>{if(!Array.isArray(areasByGovernorate[g])) areasByGovernorate[g]=[];});
+      normalizeCairoAreas();
       refreshAllLocationSelects();
     }
     renderProperties();
@@ -1823,7 +1935,13 @@ function refreshAdmin(){
   const pending=pendingSubmissions;
   document.getElementById("reviewTable").innerHTML=pending.length?pending.map(p=>`
     <tr><td>${esc(p.submissionId||p._docId)} — ${esc(p.title)}</td><td>${esc(p.area||"")} — ${esc(p.governorate||"القاهرة")}</td><td>${money(Number(p.price||0))} ج.م</td>
-    <td><button class="btn gold" style="padding:6px 12px;font-size:12px" onclick="approveProperty('${p._docId||p.submissionId}')">اعتماد</button></td></tr>
+    <td>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <button class="btn ghost" style="padding:6px 10px;font-size:11px" onclick="openSubmissionReview('${p._docId||p.submissionId}')">معاينة</button>
+        <button class="btn gold" style="padding:6px 10px;font-size:11px" onclick="approveProperty('${p._docId||p.submissionId}')">اعتماد</button>
+        <button class="btn ghost" style="padding:6px 10px;font-size:11px;border-color:rgba(216,92,92,.45);color:#f2b0b0" onclick="openRejectSubmission('${p._docId||p.submissionId}')">رفض</button>
+      </div>
+    </td></tr>
   `).join(""):`<tr><td colspan="4">لا توجد عقارات تحت المراجعة حاليًا.</td></tr>`;
 
   document.getElementById("notifTable").innerHTML=notifications.length?notifications.slice(0,10).map(n=>`
