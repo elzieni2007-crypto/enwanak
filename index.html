@@ -383,7 +383,7 @@ th{color:#8f9ba7}
 <footer>
   <div class="shell footer-row">
     <div><b style="color:#fff">عنوانك ENWANAK</b> — عقارات من المالك مباشرة في مصر</div>
-    <div>ENWANAK V8.3 · Firebase Live + Secure Admin + FCM Ready</div>
+    <div>ENWANAK V8.4 · Firebase Workflow + Storage + Clients + FCM</div>
   </div>
 </footer>
 
@@ -417,7 +417,8 @@ th{color:#8f9ba7}
 <input type="file" id="oImages" multiple accept="image/*" onchange="handleOwnerImages(event)">
     <div id="oImagesPreview" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"></div>
   </div>
-  <button class="btn gold" style="width:100%" onclick="addProperty()">إرسال للمراجعة</button>
+  <div id="ownerSubmitStatus" class="note" style="display:none;margin-bottom:10px"></div>
+  <button id="ownerSubmitBtn" class="btn gold" style="width:100%" onclick="addProperty()">إرسال للمراجعة</button>
 </div></div>
 
 <!-- Request Modal -->
@@ -472,7 +473,8 @@ th{color:#8f9ba7}
     <b>التسجيل والبحث بدون رسوم.</b> العمولة تستحق على العميل فقط عند إتمام الصفقة:
     شراء 1% من قيمة العقار · إيجار قيمة شهر واحد. <b>لا توجد عمولة على المالك.</b>
   </div>
-  <button class="btn gold" style="width:100%" onclick="saveRequest()">سجّل طلبي واعرض المطابقات</button>
+  <div id="requestSubmitStatus" class="note" style="display:none;margin-bottom:10px"></div>
+  <button id="requestSubmitBtn" class="btn gold" style="width:100%" onclick="saveRequest()">سجّل طلبي واعرض المطابقات</button>
 </div></div>
 
 
@@ -519,7 +521,7 @@ th{color:#8f9ba7}
   <div class="modal-head"><h3>لوحة الإدارة — Firebase Live</h3><button class="close" onclick="closeModal('adminModal')">✕</button></div>
   <div class="security-note">
     <b>حالة الـBackend:</b> <span id="firebaseStatus">جارٍ الاتصال بـ Firebase…</span><br>
-    البيانات التشغيلية محفوظة في Cloud Firestore، ودخول الإدارة عبر Firebase Authentication. الصور مؤجلة لحين تفعيل Storage.
+    البيانات التشغيلية محفوظة في Cloud Firestore، ودخول الإدارة عبر Firebase Authentication، وصور العقارات مرتبطة بـ Firebase Storage.
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
       <button class="btn ghost" onclick="enableAdminPush()">تفعيل تنبيهات الإدارة</button>
       <button class="btn ghost" onclick="adminLogout()">تسجيل الخروج</button>
@@ -527,22 +529,27 @@ th{color:#8f9ba7}
     <div id="pushStatus" style="margin-top:8px;font-size:12px;color:#c7d2dc"></div>
   </div>
   <div class="stats">
-    <div class="stat"><b id="sProps">0</b><span>العقارات</span></div>
+    <div class="stat"><b id="sProps">0</b><span>العقارات المنشورة</span></div>
     <div class="stat"><b id="sAvail">0</b><span>متاح</span></div>
+    <div class="stat"><b id="sPending">0</b><span>تحت المراجعة</span></div>
     <div class="stat"><b id="sReq">0</b><span>طلبات عملاء</span></div>
-    <div class="stat"><b id="sDeals">0</b><span>صفقات</span></div>
+    <div class="stat"><b id="sLeads">0</b><span>Leads</span></div>
+    <div class="stat"><b id="sDeals">0</b><span>سجل العمليات</span></div>
   </div>
 
   <h4 style="margin:24px 0 10px;color:var(--gold2)">عقارات تحت المراجعة</h4>
   <div class="tablewrap"><table><thead><tr><th>العقار</th><th>المنطقة</th><th>السعر</th><th></th></tr></thead><tbody id="reviewTable"></tbody></table></div>
 
   <h4 style="margin:24px 0 10px;color:var(--gold2)">تنبيهات مطابقة جديدة</h4>
-  <div class="tablewrap"><table><thead><tr><th>العميل</th><th>الهاتف</th><th>العقار المطابق</th><th>نسبة التطابق</th><th>التاريخ</th></tr></thead><tbody id="notifTable"></tbody></table></div>
+  <div class="tablewrap"><table><thead><tr><th>العميل</th><th>الهاتف</th><th>العقار المطابق</th><th>نسبة التطابق</th><th>التاريخ</th><th></th></tr></thead><tbody id="notifTable"></tbody></table></div>
+
+  <h4 style="margin:24px 0 10px;color:var(--gold2)">العملاء وطلبات العقار</h4>
+  <div class="tablewrap"><table><thead><tr><th>العميل</th><th>الهاتف</th><th>الطلب</th><th>المنطقة</th><th>الميزانية</th><th></th></tr></thead><tbody id="clientsTable"></tbody></table></div>
 
   <h4 style="margin:24px 0 10px;color:var(--gold2)">ربط عقار بعميل وتحديث الحالة</h4>
   <div class="form-grid">
     <div class="field"><label>العقار</label><select id="dealProperty" onchange="prefillDealPrice()"></select></div>
-    <div class="field"><label>اسم العميل</label><input id="dealClient"></div>
+    <div class="field"><label>العميل / طلب العميل</label><select id="dealClient" onchange="syncDealClientInfo()"><option value="">اختر العميل</option></select><small id="dealClientInfo" style="color:#8f9ba7;margin-top:5px;display:block"></small></div>
     <div class="field"><label>الحالة</label><select id="dealStatus" onchange="updateDealPriceRequirement()"><option value="reserved">محجوز</option><option value="contract">تحت التعاقد</option><option value="sold">تم البيع</option><option value="rented">تم التأجير</option></select></div>
     <div class="field"><label>السعر النهائي / قيمة الإيجار الشهرية</label><input id="dealPrice" type="number" min="0" placeholder="إجباري عند البيع أو التأجير"></div>
     <div class="field"><label>تاريخ إتمام العملية</label><input id="dealCloseDate" type="date"></div>
@@ -656,12 +663,17 @@ window.ENW_DB = {
     return urls;
   },
   async submitProperty(payload,files=[]){
-    const imageUrls=files.length ? await this.uploadSubmissionImages(payload.submissionId,files) : [];
+    let imageUrls=[];
+    let imageError=null;
+    if(files.length){
+      try{ imageUrls=await this.uploadSubmissionImages(payload.submissionId,files); }
+      catch(e){ imageError=e; console.error("Storage upload failed",e); }
+    }
     payload.imageUrls=imageUrls;
     payload.img=imageUrls[0]||"";
     payload.gallery=imageUrls;
     await setDoc(doc(db,"propertySubmissions",payload.submissionId),clean(payload));
-    return payload.submissionId;
+    return {submissionId:payload.submissionId,imageUrls,imageError};
   },
   async submitRequest(payload){ await setDoc(doc(db,"requests",payload.id),clean(payload)); },
   async submitLead(payload){ await setDoc(doc(db,"leads",payload.id),clean(payload)); },
@@ -712,7 +724,10 @@ window.ENW_DB = {
     const permission=await Notification.requestPermission();
     if(permission!=="granted") throw new Error("لم يتم السماح بالإشعارات");
     if(!messaging) messaging=getMessaging(app);
-    const reg=await navigator.serviceWorker.register("./firebase-messaging-sw.js");
+    const swUrl=new URL("firebase-messaging-sw.js",window.location.href).href;
+    const check=await fetch(swUrl,{cache:"no-store"});
+    if(!check.ok) throw new Error(`ملف firebase-messaging-sw.js غير موجود على GitHub (${check.status})`);
+    const reg=await navigator.serviceWorker.register(swUrl);
     const token=await getToken(messaging,{vapidKey:VAPID_KEY,serviceWorkerRegistration:reg});
     if(!token) throw new Error("تعذر إنشاء FCM token");
     await setDoc(doc(db,"deviceTokens",auth.currentUser.uid),{
@@ -1074,7 +1089,7 @@ function renderProperties(){
       <div class="owner">✓ مالك مباشر — البيانات محفوظة لدى عنوانك</div>
       <div style="display:flex;gap:8px;margin-top:12px">
         <button class="btn gold" style="flex:1;padding:10px" onclick="openProperty('${esc(p.id)}')">عرض التفاصيل</button>
-        <button class="btn ghost" style="flex:1;padding:10px" ${p.status!=="available"?'disabled style="opacity:.5"':''} onclick="openInterest('${esc(p.id)}')">مهتم بالعقار</button>
+        <button class="btn ghost" style="flex:1;padding:10px;${p.status!=="available"?'opacity:.55':''}" ${p.status!=="available"?'disabled':''} onclick="openInterest('${esc(p.id)}')">${p.status==="available"?"مهتم بالعقار":statusLabel(p.status)}</button>
       </div>
     </div>
   </article>`).join("") || `<div style="grid-column:1/-1;border:1px solid var(--line);border-radius:20px;padding:40px;text-align:center;color:#9ba7b3">لا توجد وحدات مطابقة حاليًا. استخدم "اطلب عقار" وسنسجل طلبك.</div>`;
@@ -1156,7 +1171,16 @@ function toggleMobileMenu(){document.getElementById("mobileMenu").classList.togg
 function openModal(id){document.getElementById(id).classList.add("open")}
 function closeModal(id){document.getElementById(id).classList.remove("open")}
 
+let ownerSubmissionInProgress=false;
+function setInlineStatus(id,message,type="info"){
+  const el=document.getElementById(id); if(!el) return;
+  el.style.display=message?"block":"none";
+  el.textContent=message||"";
+  el.style.borderColor=type==="error"?"rgba(216,92,92,.45)":type==="success"?"rgba(74,176,127,.45)":"rgba(231,184,92,.22)";
+}
+
 async function addProperty(){
+  if(ownerSubmissionInProgress) return;
   const title=document.getElementById("oTitle").value.trim(), owner=document.getElementById("oName").value.trim(), phone=document.getElementById("oPhone").value.trim();
   const size=Number(document.getElementById("oSize").value), price=Number(document.getElementById("oPrice").value);
   const missing=[];
@@ -1166,35 +1190,37 @@ async function addProperty(){
   if(!price) missing.push("السعر");
   if(!title) missing.push("عنوان الإعلان");
   if(missing.length){
-    alert("برجاء استكمال الحقول الإلزامية: " + missing.join("، "));
+    setInlineStatus("ownerSubmitStatus","برجاء استكمال: "+missing.join("، "),"error");
     return;
   }
+  ownerSubmissionInProgress=true;
+  const btn=document.getElementById("ownerSubmitBtn");
+  if(btn){btn.disabled=true;btn.textContent="جارٍ حفظ العقار…";}
+  setInlineStatus("ownerSubmitStatus",ownerImagesBuffer.length?"جارٍ رفع الصور ثم حفظ بيانات العقار…":"جارٍ حفظ بيانات العقار…");
   const submissionId="ENW-S-"+Date.now()+"-"+Math.random().toString(36).slice(2,6);
   const payload={
     submissionId,title,description:document.getElementById("oDesc").value.trim(),
     ownerName:owner,ownerPhone:phone,governorate:document.getElementById("oGov").value||"القاهرة",
     area:document.getElementById("oArea").value,type:document.getElementById("oType").value,
     size,price,tx:document.getElementById("oTx").value,kind:document.getElementById("oKind").value,
-    status:"review",createdAt:new Date().toISOString(),
-    acquisition:{...ENW_ACQ}
+    status:"review",createdAt:new Date().toISOString(),acquisition:{...ENW_ACQ}
   };
   try{
-    await window.ENW_DB.submitProperty(payload, ownerImagesBuffer.map(x=>x.file));
+    const result=await window.ENW_DB.submitProperty(payload, ownerImagesBuffer.map(x=>x.file));
+    const imageFailed=!!result?.imageError;
     ["oName","oPhone","oSize","oPrice","oTitle","oDesc"].forEach(f=>document.getElementById(f).value="");
-    clearOwnerImages();
-    closeModal("ownerModal");
-    alert(`تم تسجيل العقار بنجاح برقم طلب ${submissionId}. سيظهر بعد مراجعة الإدارة واعتماده.`);
+    if(!imageFailed) clearOwnerImages();
+    setInlineStatus("ownerSubmitStatus",imageFailed
+      ? `تم حفظ العقار برقم ${submissionId}، لكن تعذر رفع الصور. كود الخطأ: ${result.imageError?.code||result.imageError?.message||"Storage error"}. لن يمنع ذلك مراجعة العقار.`
+      : `تم تسجيل العقار والصور بنجاح برقم ${submissionId}. سيظهر بعد مراجعة الإدارة واعتماده.`, imageFailed?"error":"success");
+    if(!imageFailed){ setTimeout(()=>{ closeModal("ownerModal"); setInlineStatus("ownerSubmitStatus",""); },900); }
   }catch(e){
     console.error("Property submission failed:", e);
-    const code = String(e?.code || "");
-    const msg = String(e?.message || "");
-    if(code.includes("storage/") || msg.toLowerCase().includes("storage")){
-      alert("تعذر رفع صور العقار إلى Firebase Storage. تأكد أن الصور أقل من 5MB وأنها بصيغة صورة ثم حاول مرة أخرى.");
-    }else if(code.includes("permission-denied") || msg.toLowerCase().includes("permission")){
-      alert("رفضت قواعد Firebase حفظ البيانات. راجع صلاحيات Firestore/Storage.");
-    }else{
-      alert("تعذر إكمال تسجيل العقار في Firebase. حاول مرة أخرى، وإذا استمرت المشكلة سنراجع الخطوة التي فشلت بالتحديد.");
-    }
+    const code=String(e?.code||e?.message||"Unknown error");
+    setInlineStatus("ownerSubmitStatus","تعذر حفظ بيانات العقار في Firestore: "+code,"error");
+  }finally{
+    ownerSubmissionInProgress=false;
+    if(btn){btn.disabled=false;btn.textContent="إرسال للمراجعة";}
   }
 }
 
@@ -1207,7 +1233,7 @@ function notifyMatchingRequests(p){
     if(result && result.score>=50){
       notifications.unshift({
         id:"N-"+Date.now()+"-"+Math.random().toString(36).slice(2,6),
-        clientName:req.name, clientPhone:req.phone,
+        clientName:req.name, clientPhone:req.phone, clientRequestId:req.id||"",
         propertyId:p.id, propertyTitle:p.title, score:result.score,
         date:new Date().toLocaleDateString("ar-EG")
       });
@@ -1218,9 +1244,11 @@ function notifyMatchingRequests(p){
   return count;
 }
 
+let requestSubmissionInProgress=false;
 async function saveRequest(){
+  if(requestSubmissionInProgress) return;
   const name=document.getElementById("rName").value.trim(), phone=document.getElementById("rPhone").value.trim();
-  if(!name||!phone){alert("الاسم ورقم الموبايل مطلوبان.");return}
+  if(!name||!phone){setInlineStatus("requestSubmitStatus","الاسم ورقم الموبايل مطلوبان.","error");return}
   const request={
     id:"R-"+Date.now(),name,phone,tx:document.getElementById("rTx").value,kind:document.getElementById("rKind").value,
     governorate:document.getElementById("rGov").value,area:document.getElementById("rArea").value,area2:document.getElementById("rArea2").value,
@@ -1231,10 +1259,18 @@ async function saveRequest(){
     features:document.getElementById("rFeatures").value.trim(),need:document.getElementById("rNeed").value.trim(),
     date:new Date().toLocaleDateString("ar-EG"),createdAt:new Date().toISOString()
   };
+  requestSubmissionInProgress=true;
+  const btn=document.getElementById("requestSubmitBtn"); if(btn){btn.disabled=true;btn.textContent="جارٍ تسجيل الطلب…";}
+  setInlineStatus("requestSubmitStatus","جارٍ حفظ طلبك في قاعدة العملاء…");
   try{
     await window.ENW_DB.submitRequest(request);
-    requests.push(request); closeModal("requestModal"); showMatches(request);
-  }catch(e){ console.error(e); alert("تعذر حفظ الطلب في Firebase. حاول مرة أخرى."); }
+    requests.push(request);
+    setInlineStatus("requestSubmitStatus","تم تسجيل الطلب بنجاح.","success");
+    closeModal("requestModal");
+    showMatches(request);
+    if(adminSignedIn) refreshAdmin();
+  }catch(e){ console.error(e); setInlineStatus("requestSubmitStatus","تعذر حفظ الطلب في Firebase: "+String(e?.code||e?.message||"Unknown error"),"error"); }
+  finally{requestSubmissionInProgress=false;if(btn){btn.disabled=false;btn.textContent="سجّل طلبي واعرض المطابقات";}}
 }
 
 function scoreMatch(p,req){
@@ -1348,11 +1384,29 @@ function updateDealCommissionPreview(){
 }
 document.addEventListener("input",e=>{ if(e.target?.id==="dealPrice") updateDealCommissionPreview(); });
 
+function getSelectedClientRequest(){
+  const id=document.getElementById("dealClient")?.value||"";
+  return requests.find(r=>r.id===id)||null;
+}
+function syncDealClientInfo(){
+  const r=getSelectedClientRequest();
+  const el=document.getElementById("dealClientInfo");
+  if(!el) return;
+  el.textContent=r?`${r.name} · ${r.phone} · ${r.tx==="rent"?"إيجار":"شراء"} · ${r.area||r.governorate||""}`:"";
+}
+function prepareDeal(propertyId,requestId){
+  const p=document.getElementById("dealProperty"); const c=document.getElementById("dealClient");
+  if(p && propertyId){p.value=propertyId;prefillDealPrice();}
+  if(c && requestId){c.value=requestId;syncDealClientInfo();}
+  const section=document.getElementById("dealProperty"); if(section) section.scrollIntoView({behavior:"smooth",block:"center"});
+}
+
 async function createDeal(){
   const pid=document.getElementById("dealProperty").value;
-  const client=document.getElementById("dealClient").value.trim();
+  const clientRequest=getSelectedClientRequest();
+  const client=clientRequest?.name||"";
   const status=document.getElementById("dealStatus").value;
-  if(!pid||!client){alert("اختر العقار واكتب اسم العميل.");return}
+  if(!pid||!clientRequest){alert("اختر العقار والعميل من القائمة.");return}
   const p=properties.find(x=>x.id===pid); if(!p)return;
 
   const isClosed=["sold","rented"].includes(status);
@@ -1380,6 +1434,8 @@ async function createDeal(){
     id:"D-"+Date.now(),
     propertyId:pid,
     client,
+    clientRequestId:clientRequest.id,
+    clientPhone:clientRequest.phone||"",
     status,
     price:finalPrice,
     finalPrice,
@@ -1405,7 +1461,7 @@ async function createDeal(){
   }catch(e){ console.error(e); alert("تعذر حفظ العملية في Firebase."); return; }
   renderProperties();
   refreshAdmin();
-  document.getElementById("dealClient").value="";
+  document.getElementById("dealClient").value=""; syncDealClientInfo();
   document.getElementById("dealPrice").value="";
   document.getElementById("dealCloseDate").value="";
   alert(`تم حفظ العملية وتحديث ${pid} إلى: ${statusLabel(status)}${isClosed?` — العمولة ${money(commission)} ج.م`:""}`);
@@ -1443,7 +1499,7 @@ function openProperty(id){
           <div class="detail-item"><span>التصنيف</span><b>${p.kind==="admin"?"إداري":"سكني"}</b></div>
         </div>
         <div class="owner">✓ مالك مباشر — رقم المالك غير معروض للعامة</div>
-        <button class="btn gold" style="width:100%;margin-top:16px" ${p.status!=="available"?'disabled style="opacity:.5;width:100%;margin-top:16px"':''} onclick="closeModal('propertyModal');openInterest('${esc(p.id)}')">مهتم بالعقار</button>
+        <button class="btn gold" style="width:100%;margin-top:16px;${p.status!=="available"?'opacity:.55':''}" ${p.status!=="available"?'disabled':''} onclick="closeModal('propertyModal');openInterest('${esc(p.id)}')">${p.status==="available"?"مهتم بالعقار":statusLabel(p.status)}</button>
       </div>
     </div>
     <div style="margin-top:24px">
@@ -1716,9 +1772,19 @@ function exportReportCSV(type){
 function refreshAdmin(){
   document.getElementById("sProps").textContent=properties.length;
   document.getElementById("sAvail").textContent=properties.filter(p=>p.status==="available").length;
+  document.getElementById("sPending").textContent=pendingSubmissions.length;
   document.getElementById("sReq").textContent=requests.length;
+  document.getElementById("sLeads").textContent=leads.length;
   document.getElementById("sDeals").textContent=deals.length;
   document.getElementById("dealProperty").innerHTML=properties.filter(p=>!["sold","rented"].includes(p.status)).map(p=>`<option value="${esc(p.id)}">${esc(p.id)} — ${esc(p.title)}</option>`).join("");
+  const clientSelect=document.getElementById("dealClient");
+  if(clientSelect){
+    const current=clientSelect.value;
+    clientSelect.innerHTML='<option value="">اختر العميل / الطلب</option>'+requests.map(r=>`<option value="${esc(r.id)}">${esc(r.name)} — ${esc(r.phone)} — ${r.tx==="rent"?"إيجار":"شراء"}</option>`).join("");
+    if(requests.some(r=>r.id===current)) clientSelect.value=current;
+    syncDealClientInfo();
+  }
+  document.getElementById("clientsTable").innerHTML=requests.length?requests.slice().reverse().slice(0,20).map(r=>`<tr><td>${esc(r.name)}</td><td>${esc(r.phone)}</td><td>${r.tx==="rent"?"إيجار":"شراء"} — ${esc(r.type||"أي نوع")}</td><td>${esc(r.area||r.governorate||"")}</td><td>${r.budget?money(r.budget)+" ج.م":"—"}</td><td><button class="btn ghost" style="padding:6px 10px;font-size:11px" onclick="prepareDeal('', '${esc(r.id)}')">اختيار للربط</button></td></tr>`).join(""):`<tr><td colspan="6">لا توجد طلبات عملاء بعد.</td></tr>`;
   document.getElementById("dealsTable").innerHTML=deals.slice(0,12).map(d=>{
     const p=properties.find(x=>x.id===d.propertyId)||{};
     const finalPrice=Number(d.finalPrice||d.price||0);
@@ -1737,8 +1803,8 @@ function refreshAdmin(){
   `).join(""):`<tr><td colspan="4">لا توجد عقارات تحت المراجعة حاليًا.</td></tr>`;
 
   document.getElementById("notifTable").innerHTML=notifications.length?notifications.slice(0,10).map(n=>`
-    <tr><td>${esc(n.clientName)}</td><td>${esc(n.clientPhone)}</td><td>${esc(n.propertyId)} — ${esc(n.propertyTitle)}</td><td>${n.score}%</td><td>${n.date}</td></tr>
-  `).join(""):`<tr><td colspan="5">لا توجد تنبيهات مطابقة بعد.</td></tr>`;
+    <tr><td>${esc(n.clientName)}</td><td>${esc(n.clientPhone)}</td><td>${esc(n.propertyId)} — ${esc(n.propertyTitle)}</td><td>${n.score}%</td><td>${n.date}</td><td><button class="btn gold" style="padding:6px 10px;font-size:11px" onclick="prepareDeal('${esc(n.propertyId)}','${esc(n.clientRequestId||"")}')">ربط</button></td></tr>
+  `).join(""):`<tr><td colspan="6">لا توجد تنبيهات مطابقة بعد.</td></tr>`;
 
   refreshAdminLocationControls();
   renderReportFilters();
