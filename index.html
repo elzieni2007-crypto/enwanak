@@ -249,7 +249,7 @@ th{color:#8f9ba7}
     <div class="brand"><div class="brand-mark">عنوانك<span>ENWANAK</span></div></div>
     <nav class="navlinks">
       <a class="active" href="#">الرئيسية</a><a href="#properties">بحث</a><a href="#properties">شقق سكنية</a>
-      <a href="#properties">مكاتب إدارية</a><a href="#owner">طلب عقار</a><a href="#owner">عن عنوانك</a>
+      <a href="#properties">عقارات إدارية</a><a href="#owner">طلب عقار</a><a href="#owner">عن عنوانك</a>
     </nav>
     <div class="nav-actions">
       <div class="location-chip">⌖ القاهرة⌄</div>
@@ -261,7 +261,7 @@ th{color:#8f9ba7}
     <a class="active" href="#" onclick="toggleMobileMenu()">الرئيسية</a>
     <a href="#properties" onclick="toggleMobileMenu()">بحث</a>
     <a href="#properties" onclick="toggleMobileMenu()">شقق سكنية</a>
-    <a href="#properties" onclick="toggleMobileMenu()">مكاتب إدارية</a>
+    <a href="#properties" onclick="toggleMobileMenu()">عقارات إدارية</a>
     <a href="#owner" onclick="toggleMobileMenu()">طلب عقار</a>
     <a href="#owner" onclick="toggleMobileMenu()">عن عنوانك</a>
     <div class="location-chip">⌖ القاهرة⌄</div>
@@ -279,11 +279,13 @@ th{color:#8f9ba7}
       <div class="search-panel">
         <div class="switches">
           <div class="segment" id="txSegment">
-            <button class="active" data-value="sale" onclick="toggleSegment(this,'txSegment')">شراء</button>
+            <button class="active" data-value="" onclick="toggleSegment(this,'txSegment')">الكل</button>
+            <button data-value="sale" onclick="toggleSegment(this,'txSegment')">شراء</button>
             <button data-value="rent" onclick="toggleSegment(this,'txSegment')">إيجار</button>
           </div>
           <div class="segment" id="kindSegment">
-            <button class="active" data-value="residential" onclick="toggleSegment(this,'kindSegment')">سكني</button>
+            <button class="active" data-value="" onclick="toggleSegment(this,'kindSegment')">الكل</button>
+            <button data-value="residential" onclick="toggleSegment(this,'kindSegment')">سكني</button>
             <button data-value="admin" onclick="toggleSegment(this,'kindSegment')">إداري</button>
           </div>
         </div>
@@ -297,7 +299,7 @@ th{color:#8f9ba7}
             <select id="areaSelect" data-allow-custom="1"><option value="">المنطقة / المدينة</option></select>
           </div>
           <div class="control"><label>نوع العقار</label>
-            <select id="typeSelect"><option value="">كل الأنواع</option><option>شقة</option><option>فيلا</option><option>دوبلكس</option><option>بنتهاوس</option><option>مكتب</option><option>مقر إداري</option><option>عيادة</option></select>
+            <select id="typeSelect"><option value="">كل الأنواع</option><option>شقة</option><option>فيلا</option><option>دوبلكس</option><option>بنتهاوس</option><option>مقر إداري</option></select>
           </div>
           <div class="control"><label>المساحة</label><input id="minArea" type="number" placeholder="100 م²"></div>
           <div class="control"><label>السعر</label><input id="maxPrice" type="number" placeholder="10,000,000"></div>
@@ -354,7 +356,7 @@ th{color:#8f9ba7}
     </div>
     <div class="category-grid">
       <div class="category" style="background-image:url('https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=1100&q=88')"><div class="category-content"><h3>عقارات سكنية فاخرة</h3><p>شقق، فيلات، دوبلكس وبنتهاوس</p></div></div>
-      <div class="category" style="background-image:url('https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=900&q=88')"><div class="category-content"><h3>مكاتب إدارية</h3><p>مكاتب ومقار للشركات والفرق</p></div></div>
+      <div class="category" style="background-image:url('https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=900&q=88')"><div class="category-content"><h3>عقارات إدارية</h3><p>مقار ووحدات إدارية للشركات والفرق</p></div></div>
       <div class="category" style="background-image:url('https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=900&q=88')"><div class="category-content"><h3>مقار جاهزة</h3><p>تشطيب كامل ومساحات متنوعة</p></div></div>
     </div>
   </div>
@@ -383,7 +385,7 @@ th{color:#8f9ba7}
 <footer>
   <div class="shell footer-row">
     <div><b style="color:#fff">عنوانك ENWANAK</b> — عقارات من المالك مباشرة في مصر</div>
-    <div>ENWANAK V8.4 · Firebase Workflow + Storage + Clients + FCM</div>
+    <div>ENWANAK V8.5 · Firebase Workflow + Storage + Clients + FCM</div>
   </div>
 </footer>
 
@@ -400,11 +402,11 @@ th{color:#8f9ba7}
     <div class="field"><label>سكني / إداري</label><select id="oKind"><option value="residential">سكني</option><option value="admin">إداري</option></select></div>
     <div class="field"><label>المحافظة</label><select id="oGov"></select></div>
     <div class="field"><label>المنطقة / المدينة</label><select id="oArea" data-allow-custom="1"></select></div>
-    <div class="field"><label>نوع العقار</label><select id="oType"><option>شقة</option><option>فيلا</option><option>دوبلكس</option><option>بنتهاوس</option><option>مكتب</option><option>مقر إداري</option><option>عيادة</option></select></div>
+    <div class="field"><label>نوع العقار</label><select id="oType"><option>شقة</option><option>فيلا</option><option>دوبلكس</option><option>بنتهاوس</option><option>مقر إداري</option></select></div>
     <div class="field"><label>المساحة م² <b style="color:#f4d28a">*</b></label><input id="oSize" type="number" required></div>
     <div class="field"><label>السعر <b style="color:#f4d28a">*</b></label><input id="oPrice" type="number" required></div>
   </div>
-  <div class="field"><label>عنوان الإعلان <b style="color:#f4d28a">*</b></label><input id="oTitle" required placeholder="مثال: مكتب إداري فاخر بمدخل مستقل"></div>
+  <div class="field"><label>عنوان الإعلان <b style="color:#f4d28a">*</b></label><input id="oTitle" required placeholder="مثال: عقار إداري فاخر بمدخل مستقل"></div>
   <div class="field"><label>الوصف</label><textarea id="oDesc" rows="3"></textarea></div>
   <div class="field">
     <label>صور العقار (معاينة مؤقتة)</label><div class="note" style="margin:6px 0 10px">يمكنك رفع حتى 6 صور للعقار، بحد أقصى 5MB للصورة. الصور تُحفظ في Firebase Storage وبيانات العقار في Firestore.</div>
@@ -444,7 +446,7 @@ th{color:#8f9ba7}
     <div class="field"><label>نوع الوحدة</label>
       <select id="rType">
         <option value="">أي نوع</option><option>شقة</option><option>فيلا</option><option>دوبلكس</option>
-        <option>بنتهاوس</option><option>مكتب</option><option>مقر إداري</option><option>عيادة</option>
+        <option>بنتهاوس</option><option>مقر إداري</option>
       </select>
     </div>
     <div class="field"><label>التشطيب</label>
@@ -999,14 +1001,14 @@ function refillAreaSelect(govId, areaId){
 function fillAreas(){
   ["govSelect","oGov","rGov"].forEach(id=>{
     const el=document.getElementById(id);
-    if(el) el.innerHTML=governorateOptions(id==="govSelect"?"القاهرة":"");
+    if(el) el.innerHTML=governorateOptions("");
   });
 
-  // Launch search defaults to Cairo; owner/request may choose any governorate.
-  if(document.getElementById("govSelect")) document.getElementById("govSelect").value="القاهرة";
+  // Search starts unfiltered so visitors see all available properties by default.
+  if(document.getElementById("govSelect")) document.getElementById("govSelect").value="";
   ["areaSelect","oArea","rArea","rArea2"].forEach(id=>{
     const el=document.getElementById(id);
-    if(el) el.innerHTML=areaOptions(id==="areaSelect"?"القاهرة":"");
+    if(el) el.innerHTML=areaOptions("");
   });
 
   const bindings=[
@@ -1029,8 +1031,30 @@ function fillAreas(){
     if(el) enhanceSearchableSelect(el);
   });
 }
+function bindKindTypeFilters(){
+  const oKind=document.getElementById("oKind");
+  if(oKind && oKind.dataset.typeBound!=="1"){oKind.dataset.typeBound="1";oKind.addEventListener("change",()=>setTypeOptions("oType",oKind.value,false));}
+  const rKind=document.getElementById("rKind");
+  if(rKind && rKind.dataset.typeBound!=="1"){rKind.dataset.typeBound="1";rKind.addEventListener("change",()=>setTypeOptions("rType",rKind.value,true));}
+  syncKindTypeFields();
+}
+
 function currentValue(segmentId){return document.querySelector(`#${segmentId} button.active`).dataset.value}
-function toggleSegment(el,id){document.querySelectorAll(`#${id} button`).forEach(b=>b.classList.remove("active"));el.classList.add("active");renderProperties()}
+function setTypeOptions(selectId, kind, includeAny=true){
+  const el=document.getElementById(selectId); if(!el) return;
+  const current=el.value;
+  const residential=["شقة","فيلا","دوبلكس","بنتهاوس"];
+  const admin=["مقر إداري"];
+  const items=kind==="residential"?residential:kind==="admin"?admin:[...residential,...admin];
+  el.innerHTML=(includeAny?`<option value="">${selectId==="typeSelect"?"كل الأنواع":"أي نوع"}</option>`:"")+items.map(x=>`<option>${x}</option>`).join("");
+  if(items.includes(current)) el.value=current;
+}
+function syncKindTypeFields(){
+  setTypeOptions("typeSelect",currentValue("kindSegment"),true);
+  const ok=document.getElementById("oKind")?.value||"residential"; setTypeOptions("oType",ok,false);
+  const rk=document.getElementById("rKind")?.value||"residential"; setTypeOptions("rType",rk,true);
+}
+function toggleSegment(el,id){document.querySelectorAll(`#${id} button`).forEach(b=>b.classList.remove("active"));el.classList.add("active");if(id==="kindSegment") setTypeOptions("typeSelect",el.dataset.value,true);renderProperties()}
 function quickArea(a){
   const gov=document.getElementById("govSelect");
   if(gov) gov.value="القاهرة";
@@ -1073,7 +1097,7 @@ function renderProperties(){
   const type=document.getElementById("typeSelect").value;
   const min=Number(document.getElementById("minArea").value||0);
   const max=Number(document.getElementById("maxPrice").value||0);
-  const list=properties.filter(p=>p.status!=="review" && p.tx===tx && p.kind===kind && (!governorate||(p.governorate||"القاهرة")===governorate) && areaMatches(p.area,area) && (!type||p.type===type) && (!min||p.size>=min) && (!max||p.price<=max));
+  const list=properties.filter(p=>p.status!=="review" && (!tx||p.tx===tx) && (!kind||p.kind===kind) && (!governorate||(p.governorate||"القاهرة")===governorate) && areaMatches(p.area,area) && (!type||p.type===type) && (!min||p.size>=min) && (!max||p.price<=max));
   document.getElementById("resultCount").textContent=`${list.length} عقار مطابق`;
   document.getElementById("cards").innerHTML=list.slice(0,6).map(p=>`
   <article class="card">
@@ -1575,7 +1599,7 @@ async function persistLocationCatalog(){
   await window.ENW_DB.saveLocations(egyptGovernorates,areasByGovernorate);
 }
 function refreshAllLocationSelects(){
-  const currentMain=document.getElementById("govSelect")?.value||"القاهرة";
+  const currentMain=document.getElementById("govSelect")?.value||"";
   const currentOwner=document.getElementById("oGov")?.value||"";
   const currentReq=document.getElementById("rGov")?.value||"";
   fillAreas();
@@ -1649,7 +1673,7 @@ async function loadAdminDashboard(){
 }
 
 async function bootstrapENWANAK(){
-  fillAreas(); renderProperties();
+  fillAreas(); bindKindTypeFilters(); renderProperties();
   try{
     const [props,catalog]=await Promise.all([window.ENW_DB.loadPublicProperties(),window.ENW_DB.loadLocations()]);
     properties=(props||[]).map(p=>({...p,governorate:p.governorate||"القاهرة"}));
