@@ -383,7 +383,7 @@ th{color:#8f9ba7}
 <footer>
   <div class="shell footer-row">
     <div><b style="color:#fff">عنوانك ENWANAK</b> — عقارات من المالك مباشرة في مصر</div>
-    <div>ENWANAK V8.1 · Firebase Live + Secure Admin + FCM Ready</div>
+    <div>ENWANAK V8.3 · Firebase Live + Secure Admin + FCM Ready</div>
   </div>
 </footer>
 
@@ -394,20 +394,20 @@ th{color:#8f9ba7}
   <div class="modal-head"><h3>أضف عقارك مجانًا</h3><button class="close" onclick="closeModal('ownerModal')">✕</button></div>
   <div class="note">رقم المالك وبياناته لا تظهر للزائر، وتستخدم فقط لإدارة العقار والصفقة.</div>
   <div class="form-grid">
-    <div class="field"><label>اسم المالك</label><input id="oName"></div>
-    <div class="field"><label>رقم الموبايل</label><input id="oPhone"></div>
+    <div class="field"><label>اسم المالك <b style="color:#f4d28a">*</b></label><input id="oName" required></div>
+    <div class="field"><label>رقم الموبايل <b style="color:#f4d28a">*</b></label><input id="oPhone" required></div>
     <div class="field"><label>بيع / إيجار</label><select id="oTx"><option value="sale">بيع</option><option value="rent">إيجار</option></select></div>
     <div class="field"><label>سكني / إداري</label><select id="oKind"><option value="residential">سكني</option><option value="admin">إداري</option></select></div>
     <div class="field"><label>المحافظة</label><select id="oGov"></select></div>
     <div class="field"><label>المنطقة / المدينة</label><select id="oArea" data-allow-custom="1"></select></div>
     <div class="field"><label>نوع العقار</label><select id="oType"><option>شقة</option><option>فيلا</option><option>دوبلكس</option><option>بنتهاوس</option><option>مكتب</option><option>مقر إداري</option><option>عيادة</option></select></div>
-    <div class="field"><label>المساحة م²</label><input id="oSize" type="number"></div>
-    <div class="field"><label>السعر</label><input id="oPrice" type="number"></div>
+    <div class="field"><label>المساحة م² <b style="color:#f4d28a">*</b></label><input id="oSize" type="number" required></div>
+    <div class="field"><label>السعر <b style="color:#f4d28a">*</b></label><input id="oPrice" type="number" required></div>
   </div>
-  <div class="field"><label>عنوان الإعلان</label><input id="oTitle" placeholder="مثال: مكتب إداري فاخر بمدخل مستقل"></div>
+  <div class="field"><label>عنوان الإعلان <b style="color:#f4d28a">*</b></label><input id="oTitle" required placeholder="مثال: مكتب إداري فاخر بمدخل مستقل"></div>
   <div class="field"><label>الوصف</label><textarea id="oDesc" rows="3"></textarea></div>
   <div class="field">
-    <label>صور العقار (معاينة مؤقتة)</label><div class="note" style="margin:6px 0 10px">حاليًا الصور تُعاين على جهازك فقط ولا يتم رفعها إلى Firebase لأن Storage غير مفعّل على الخطة الحالية. بيانات العقار نفسها تُحفظ في Firestore.</div>
+    <label>صور العقار (معاينة مؤقتة)</label><div class="note" style="margin:6px 0 10px">يمكنك رفع حتى 6 صور للعقار، بحد أقصى 5MB للصورة. الصور تُحفظ في Firebase Storage وبيانات العقار في Firestore.</div>
     <input type="hidden" id="oUtmSource">
 <input type="hidden" id="oUtmMedium">
 <input type="hidden" id="oUtmCampaign">
@@ -861,6 +861,109 @@ function areaOptions(governorate, selected=""){
   // Empty governorate catalogues still support typed custom areas via data-allow-custom.
   return base+opts;
 }
+
+// Searchable dropdown used across search, owner registration and request forms.
+// Click = show the full list. Typing = filter instantly. Custom area text is allowed
+// only for selects carrying data-allow-custom="1".
+function enhanceSearchableSelect(select){
+  if(!select || select.dataset.searchEnhanced==="1") return;
+  select.dataset.searchEnhanced="1";
+
+  const allowCustom=select.dataset.allowCustom==="1";
+  const wrap=document.createElement("div");
+  wrap.className="searchable-select";
+
+  const input=document.createElement("input");
+  input.type="text";
+  input.autocomplete="off";
+  input.spellcheck=false;
+  input.setAttribute("aria-label", select.getAttribute("aria-label") || "بحث واختيار");
+  input.placeholder = select.id.includes("Gov") || select.id==="govSelect" ? "اكتب أو اختر المحافظة" : "اكتب أو اختر المنطقة / المدينة";
+
+  const optionsBox=document.createElement("div");
+  optionsBox.className="searchable-options";
+
+  const parent=select.parentNode;
+  parent.insertBefore(wrap,select);
+  wrap.appendChild(input);
+  wrap.appendChild(optionsBox);
+  wrap.appendChild(select);
+  select.style.display="none";
+
+  function optionRows(){
+    return [...select.options].filter(o=>o.value!=="");
+  }
+  function labelForCurrent(){
+    const o=[...select.options].find(x=>x.value===select.value);
+    return o && o.value ? o.textContent : "";
+  }
+  function render(filter=""){
+    const q=normalizeAreaText(filter);
+    const rows=optionRows().filter(o=>!q || normalizeAreaText(o.textContent).includes(q));
+    optionsBox.innerHTML = rows.length
+      ? rows.map(o=>`<div class="searchable-option" data-value="${esc(o.value)}">${esc(o.textContent)}</div>`).join("")
+      : `<div class="searchable-empty">${allowCustom && filter.trim()?`استخدم «${esc(filter.trim())}» كمنطقة جديدة`:'لا توجد نتائج'}</div>`;
+  }
+  function openList(){
+    render(input.value);
+    wrap.classList.add("open");
+  }
+  function commitCustom(){
+    const text=input.value.trim();
+    if(!allowCustom || !text) return false;
+    const existing=[...select.options].find(o=>normalizeAreaText(o.textContent)===normalizeAreaText(text));
+    if(existing){
+      select.value=existing.value;
+      input.value=existing.textContent;
+    }else{
+      const opt=document.createElement("option");
+      opt.value=text; opt.textContent=text; opt.dataset.custom="1";
+      select.appendChild(opt); select.value=text;
+      input.value=text;
+    }
+    select.dispatchEvent(new Event("change",{bubbles:true}));
+    return true;
+  }
+
+  input.value=labelForCurrent();
+  input.addEventListener("focus",()=>{ input.select(); openList(); });
+  input.addEventListener("click",openList);
+  input.addEventListener("input",()=>{ select.value=""; openList(); });
+  input.addEventListener("keydown",e=>{
+    if(e.key==="Enter"){
+      e.preventDefault();
+      const first=optionsBox.querySelector(".searchable-option");
+      if(first) first.click(); else if(commitCustom()) wrap.classList.remove("open");
+    }else if(e.key==="Escape"){
+      wrap.classList.remove("open"); input.value=labelForCurrent();
+    }
+  });
+  input.addEventListener("blur",()=>{
+    setTimeout(()=>{
+      if(!wrap.classList.contains("open")) return;
+      const exact=[...select.options].find(o=>normalizeAreaText(o.textContent)===normalizeAreaText(input.value));
+      if(exact){ select.value=exact.value; input.value=exact.textContent; }
+      else if(!commitCustom()) input.value=labelForCurrent();
+      wrap.classList.remove("open");
+    },150);
+  });
+  optionsBox.addEventListener("mousedown",e=>e.preventDefault());
+  optionsBox.addEventListener("click",e=>{
+    const row=e.target.closest(".searchable-option");
+    if(!row) return;
+    select.value=row.dataset.value;
+    input.value=row.textContent;
+    wrap.classList.remove("open");
+    select.dispatchEvent(new Event("change",{bubbles:true}));
+  });
+  select.addEventListener("change",()=>{
+    const txt=labelForCurrent();
+    if(txt) input.value=txt;
+  });
+  document.addEventListener("click",e=>{
+    if(!wrap.contains(e.target)) wrap.classList.remove("open");
+  });
+}
 function refillAreaSelect(govId, areaId){
   const gov=document.getElementById(govId)?.value || "";
   const area=document.getElementById(areaId);
@@ -899,7 +1002,16 @@ function fillAreas(){
   ];
   bindings.forEach(([g,a])=>{
     const gov=document.getElementById(g);
-    if(gov) gov.addEventListener("change",()=>refillAreaSelect(g,a));
+    if(gov && gov.dataset.locationBound!=="1"){
+      gov.dataset.locationBound="1";
+      gov.addEventListener("change",()=>refillAreaSelect(g,a));
+    }
+  });
+
+  // Make both governorate and area fields searchable everywhere.
+  ["govSelect","areaSelect","oGov","oArea","rGov","rArea","rArea2"].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) enhanceSearchableSelect(el);
   });
 }
 function currentValue(segmentId){return document.querySelector(`#${segmentId} button.active`).dataset.value}
@@ -991,8 +1103,11 @@ function removeOwnerImage(i){
   ownerImagesBuffer.splice(i,1); renderOwnerImagesPreview();
 }
 function clearOwnerImages(){
-  ownerImagesBuffer.forEach(x=>{if(x.preview) URL.revokeObjectURL(x.preview)});
-  clearOwnerImages();
+  ownerImagesBuffer.forEach(x=>{ if(x.preview) URL.revokeObjectURL(x.preview); });
+  ownerImagesBuffer = [];
+  const input = document.getElementById("oImages");
+  if(input) input.value = "";
+  renderOwnerImagesPreview();
 }
 
 
@@ -1044,7 +1159,16 @@ function closeModal(id){document.getElementById(id).classList.remove("open")}
 async function addProperty(){
   const title=document.getElementById("oTitle").value.trim(), owner=document.getElementById("oName").value.trim(), phone=document.getElementById("oPhone").value.trim();
   const size=Number(document.getElementById("oSize").value), price=Number(document.getElementById("oPrice").value);
-  if(!title||!owner||!phone||!size||!price){alert("برجاء استكمال البيانات الأساسية.");return}
+  const missing=[];
+  if(!owner) missing.push("اسم المالك");
+  if(!phone) missing.push("رقم الموبايل");
+  if(!size) missing.push("المساحة");
+  if(!price) missing.push("السعر");
+  if(!title) missing.push("عنوان الإعلان");
+  if(missing.length){
+    alert("برجاء استكمال الحقول الإلزامية: " + missing.join("، "));
+    return;
+  }
   const submissionId="ENW-S-"+Date.now()+"-"+Math.random().toString(36).slice(2,6);
   const payload={
     submissionId,title,description:document.getElementById("oDesc").value.trim(),
@@ -1061,7 +1185,16 @@ async function addProperty(){
     closeModal("ownerModal");
     alert(`تم تسجيل العقار بنجاح برقم طلب ${submissionId}. سيظهر بعد مراجعة الإدارة واعتماده.`);
   }catch(e){
-    console.error(e); alert("تعذر حفظ العقار في Firebase. راجع الاتصال وحاول مرة أخرى.");
+    console.error("Property submission failed:", e);
+    const code = String(e?.code || "");
+    const msg = String(e?.message || "");
+    if(code.includes("storage/") || msg.toLowerCase().includes("storage")){
+      alert("تعذر رفع صور العقار إلى Firebase Storage. تأكد أن الصور أقل من 5MB وأنها بصيغة صورة ثم حاول مرة أخرى.");
+    }else if(code.includes("permission-denied") || msg.toLowerCase().includes("permission")){
+      alert("رفضت قواعد Firebase حفظ البيانات. راجع صلاحيات Firestore/Storage.");
+    }else{
+      alert("تعذر إكمال تسجيل العقار في Firebase. حاول مرة أخرى، وإذا استمرت المشكلة سنراجع الخطوة التي فشلت بالتحديد.");
+    }
   }
 }
 
