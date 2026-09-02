@@ -635,7 +635,7 @@ th{color:#8f9ba7}
 </div></div>
 
 
-<!-- ENWANAK V8.6: Admin full review + reject reason + curated Cairo areas -->
+<!-- ENWANAK V8.7: V8.6 + direct campaign links for owner registration and property requests -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
 import {
@@ -796,7 +796,22 @@ window.addEventListener("enw-firebase-ready",()=>{
   const el=document.getElementById("firebaseStatus");
   if(el) el.textContent="Firebase متصل — Firestore + Authentication جاهزان.";
 });
+
+function handleCampaignDirectLink(){
+  const params=new URLSearchParams(window.location.search);
+  const action=(params.get("action")||"").toLowerCase();
+  if(!["register","request"].includes(action)) return;
+
+  // Keep the visitor on the full homepage, then scroll to the requested form.
+  const targetId=action==="register"?"owner":"request";
+  const target=document.getElementById(targetId);
+  if(target){
+    setTimeout(()=>target.scrollIntoView({behavior:"smooth",block:"start"}),450);
+  }
+}
+
 document.addEventListener("DOMContentLoaded",()=>{
+  handleCampaignDirectLink();
   const el=document.getElementById("firebaseStatus");
   if(el && window.ENW_FIREBASE?.configured) el.textContent="Firebase متصل — جارٍ تحميل بيانات Firestore…";
 });
