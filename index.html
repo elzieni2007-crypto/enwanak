@@ -240,6 +240,11 @@ th{color:#8f9ba7}
 }
 
 </style>
+<meta property="og:type" content="website">
+<meta property="og:title" content="عنوانك | ENWANAK">
+<meta property="og:description" content="بيع وإيجار من المالك مباشرة">
+<meta property="og:url" content="https://elzieni2007-crypto.github.io/enwanak/">
+<meta name="twitter:card" content="summary_large_image">
 </head>
 <body>
 <div class="top-strip">سجّل عقارك مجانًا — 0% عمولة على المالك · نتولى تسويق عقارك مجانًا · القاهرة والعاصمة الإدارية — قريبًا باقي محافظات مصر</div>
@@ -558,7 +563,10 @@ th{color:#8f9ba7}
     <div class="field"><label>العمولة المتوقعة</label><input id="dealCommissionPreview" readonly placeholder="تحسب تلقائيًا"></div>
   </div>
   <div class="note" style="margin-bottom:12px">عند تأكيد البيع أو التأجير يجب إدخال السعر النهائي وتاريخ الإتمام. عمولة البيع = 1% من السعر النهائي، وعمولة الإيجار = قيمة إيجار شهر واحد.</div>
-  <button class="btn gold" style="width:100%;margin-bottom:18px" onclick="createDeal()">حفظ العملية وتحديث حالة العقار</button>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px">
+  <button class="btn gold" style="flex:2;min-width:220px" onclick="createDeal()">حفظ العملية وتحديث حالة العقار</button>
+  <button class="btn ghost" style="flex:1;min-width:160px" onclick="waOwnerApproved(document.getElementById('dealProperty').value)">واتساب المالك</button>
+</div>
   <div class="tablewrap"><table><thead><tr><th>العقار</th><th>نوع الوحدة</th><th>العميل</th><th>الحالة</th><th>السعر النهائي</th><th>العمولة</th><th>التاريخ</th></tr></thead><tbody id="dealsTable"></tbody></table></div>
 
   <h4 style="margin:24px 0 10px;color:var(--gold2)">إدارة المحافظات والمناطق</h4>
@@ -595,7 +603,7 @@ th{color:#8f9ba7}
   <div class="tablewrap"><table><thead><tr><th>الكود</th><th>المحافظة</th><th>المنطقة</th><th>نوع الوحدة</th><th>العملية</th><th>العميل</th><th>السعر النهائي</th><th>العمولة</th><th>التاريخ</th></tr></thead><tbody id="reportTable"></tbody></table></div>
 
   <h4 style="margin:24px 0 10px;color:var(--gold2)">Leads المهتمين بعقارات محددة</h4>
-  <div class="tablewrap"><table><thead><tr><th>العقار</th><th>العميل</th><th>الهاتف</th><th>التاريخ</th></tr></thead><tbody id="leadsTable"></tbody></table></div>
+  <div class="tablewrap"><table><thead><tr><th>العقار</th><th>العميل</th><th>الهاتف</th><th>التاريخ</th><th>واتساب</th></tr></thead><tbody id="leadsTable"></tbody></table></div>
 
   <h4 style="margin:24px 0 10px;color:var(--gold2)">سجل العقار Property Timeline</h4>
   <div class="form-grid">
@@ -635,7 +643,7 @@ th{color:#8f9ba7}
 </div></div>
 
 
-<!-- ENWANAK V8.7: V8.6 + direct campaign links for owner registration and property requests -->
+<!-- ENWANAK V8.9: V8.8 + admin WhatsApp CRM shortcuts for owners and clients -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
 import {
@@ -1134,6 +1142,114 @@ function quickArea(a){
 function statusLabel(s){return {available:"متاح",reserved:"محجوز",contract:"تحت التعاقد",sold:"تم البيع",rented:"تم التأجير",review:"تحت المراجعة"}[s]||s}
 function statusClass(s){return s==="reserved"?"reserved":s==="contract"?"contract":(s==="sold"||s==="rented")?"sold":""}
 function money(v){return new Intl.NumberFormat("ar-EG").format(v)}
+
+function propertyShareUrl(propertyId){
+  const u=new URL(window.location.origin + window.location.pathname);
+  u.searchParams.set("property",propertyId);
+  return u.toString();
+}
+function whatsappShareUrl(property){
+  const url=propertyShareUrl(property.id);
+  const title=property.title||"عقار على عنوانك";
+  const price=property.price?`${money(Number(property.price))} ج.م`:"";
+  const area=[property.area,property.governorate].filter(Boolean).join(" - ");
+  const msg=`${title}${price?`\n${price}`:""}${area?`\n${area}`:""}\n\nشاهد تفاصيل العقار على عنوانك:\n${url}`;
+  return `https://wa.me/?text=${encodeURIComponent(msg)}`;
+}
+
+function normalizeEgyptPhone(phone){
+  let p=String(phone||"").replace(/[^\d+]/g,"");
+  if(p.startsWith("+")) p=p.slice(1);
+  if(p.startsWith("00")) p=p.slice(2);
+  if(p.startsWith("0")) p="20"+p.slice(1);
+  if(!p.startsWith("20") && p.length===10) p="20"+p;
+  return p;
+}
+function openWhatsAppMessage(phone,message){
+  const p=normalizeEgyptPhone(phone);
+  if(!p){ alert("رقم الهاتف غير متاح."); return; }
+  const url=`https://wa.me/${p}?text=${encodeURIComponent(message||"")}`;
+  window.open(url,"_blank","noopener,noreferrer");
+}
+function waOwnerSubmission(submissionId){
+  const s=pendingSubmissions.find(x=>(x._docId||x.submissionId)===submissionId);
+  if(!s)return;
+  const code=s.submissionId||submissionId;
+  openWhatsAppMessage(s.ownerPhone,`أهلًا ${s.ownerName||""}، تم استلام تسجيل عقارك على منصة عنوانك | ENWANAK برقم ${code}. العقار حاليًا تحت المراجعة وسيتم التواصل معك بعد اعتماده.`);
+}
+function waOwnerApproved(propertyId){
+  const p=properties.find(x=>x.id===propertyId);
+  if(!p)return;
+  const phone=p.ownerPhone||p.phone||"";
+  openWhatsAppMessage(phone,`أهلًا ${p.ownerName||""}، تم اعتماد ونشر عقارك على منصة عنوانك | ENWANAK برقم ${p.id}. يمكنك متابعة أي اهتمام أو تطورات من خلال فريق عنوانك.`);
+}
+function waClientRequest(requestId){
+  const r=requests.find(x=>x.id===requestId);
+  if(!r)return;
+  openWhatsAppMessage(r.phone,`أهلًا ${r.name||""}، تم استلام طلبك على منصة عنوانك | ENWANAK. سنقوم بمطابقة طلبك مع العقارات المناسبة والتواصل معك عند وجود تطابق.`);
+}
+function waClientLead(leadId){
+  const l=leads.find(x=>x.id===leadId);
+  if(!l)return;
+  const p=properties.find(x=>x.id===l.propertyId)||{};
+  openWhatsAppMessage(l.phone,`أهلًا ${l.name||""}، تم تسجيل اهتمامك بالعقار ${l.propertyId}${p.title?` — ${p.title}`:""} على منصة عنوانك | ENWANAK. سيتواصل معك فريق عنوانك لاستكمال التفاصيل.`);
+}
+function waOwnerInterest(leadId){
+  const l=leads.find(x=>x.id===leadId); if(!l)return;
+  const p=properties.find(x=>x.id===l.propertyId)||{};
+  const phone=p.ownerPhone||p.phone||"";
+  openWhatsAppMessage(phone,`أهلًا ${p.ownerName||""}، يوجد عميل أبدى اهتمامًا بعقارك ${l.propertyId}${p.title?` — ${p.title}`:""} على منصة عنوانك | ENWANAK. سيتواصل معك فريق عنوانك لاستكمال التفاصيل.`);
+}
+function waClientMatch(notificationIndex){
+  const n=notifications[notificationIndex]; if(!n)return;
+  const url=propertyShareUrl(n.propertyId);
+  openWhatsAppMessage(n.clientPhone,`أهلًا ${n.clientName||""}، وجدنا عقارًا مطابقًا لطلبك على عنوانك | ENWANAK بنسبة ${n.score||""}%.\n${n.propertyTitle||n.propertyId}\n${url}`);
+}
+
+function shareOnWhatsApp(propertyId){
+  const p=properties.find(x=>x.id===propertyId);
+  if(!p)return;
+  window.open(whatsappShareUrl(p),"_blank","noopener,noreferrer");
+}
+function setDynamicOgForProperty(property){
+  if(!property)return;
+  const firstImage=(Array.isArray(property.gallery)&&property.gallery[0]) || property.img || "";
+  const description=[
+    property.tx==="rent"?"للإيجار":"للبيع",
+    property.type||"",
+    property.area||"",
+    property.price?`${money(Number(property.price))} ج.م`:""
+  ].filter(Boolean).join(" • ");
+  const setMeta=(key,value,isName=false)=>{
+    if(!value)return;
+    const selector=isName?`meta[name="${key}"]`:`meta[property="${key}"]`;
+    let el=document.querySelector(selector);
+    if(!el){
+      el=document.createElement("meta");
+      el.setAttribute(isName?"name":"property",key);
+      document.head.appendChild(el);
+    }
+    el.setAttribute("content",value);
+  };
+  setMeta("og:title",property.title||"عقار على عنوانك");
+  setMeta("og:description",description);
+  setMeta("og:url",propertyShareUrl(property.id));
+  setMeta("og:type","website");
+  if(firstImage)setMeta("og:image",firstImage);
+  setMeta("twitter:card",firstImage?"summary_large_image":"summary",true);
+  setMeta("twitter:title",property.title||"عقار على عنوانك",true);
+  setMeta("twitter:description",description,true);
+  if(firstImage)setMeta("twitter:image",firstImage,true);
+}
+function handlePropertyDirectLink(){
+  const propertyId=new URLSearchParams(window.location.search).get("property");
+  if(!propertyId)return;
+  const p=properties.find(x=>x.id===propertyId);
+  if(!p)return;
+  setDynamicOgForProperty(p);
+  setTimeout(()=>openProperty(propertyId),250);
+}
+
 function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
 function normalizeAreaText(v){
   return String(v||"")
@@ -1175,6 +1291,7 @@ function renderProperties(){
       <div class="owner">✓ مالك مباشر — البيانات محفوظة لدى عنوانك</div>
       <div style="display:flex;gap:8px;margin-top:12px">
         <button class="btn gold" style="flex:1;padding:10px" onclick="openProperty('${esc(p.id)}')">عرض التفاصيل</button>
+        <button class="btn ghost" style="flex:1;padding:10px" onclick="shareOnWhatsApp('${esc(p.id)}')">شارك على واتساب</button>
         <button class="btn ghost" style="flex:1;padding:10px;${p.status!=="available"?'opacity:.55':''}" ${p.status!=="available"?'disabled':''} onclick="openInterest('${esc(p.id)}')">${p.status==="available"?"مهتم بالعقار":statusLabel(p.status)}</button>
       </div>
     </div>
@@ -1586,6 +1703,7 @@ function openProperty(id){
         </div>
         <div class="owner">✓ مالك مباشر — رقم المالك غير معروض للعامة</div>
         <button class="btn gold" style="width:100%;margin-top:16px;${p.status!=="available"?'opacity:.55':''}" ${p.status!=="available"?'disabled':''} onclick="closeModal('propertyModal');openInterest('${esc(p.id)}')">${p.status==="available"?"مهتم بالعقار":statusLabel(p.status)}</button>
+        <button class="btn ghost" style="width:100%;margin-top:10px" onclick="shareOnWhatsApp('${esc(p.id)}')">شارك العقار على واتساب</button>
       </div>
     </div>
     <div style="margin-top:24px">
@@ -1684,6 +1802,7 @@ function openSubmissionReview(id){
       </div>
       <div class="detail-item" style="margin-top:10px"><span>وصف العقار</span><b style="white-space:normal;line-height:1.8">${esc(sub.description||"لا يوجد وصف")}</b></div>
       <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px">
+        <button class="btn ghost" style="flex:1;min-width:160px" onclick="waOwnerSubmission('${esc(id)}')">واتساب المالك</button>
         <button class="btn gold" style="flex:1;min-width:160px" onclick="approveFromReview('${esc(id)}')">اعتماد العقار</button>
         <button class="btn ghost" style="flex:1;min-width:160px;border-color:rgba(216,92,92,.45);color:#f2b0b0" onclick="openRejectSubmission('${esc(id)}')">رفض العقار</button>
       </div>
@@ -1810,6 +1929,7 @@ async function bootstrapENWANAK(){
       refreshAllLocationSelects();
     }
     renderProperties();
+    handlePropertyDirectLink();
     const st=document.getElementById("firebaseStatus"); if(st) st.textContent="Firebase متصل — البيانات تُقرأ مباشرة من Firestore.";
   }catch(e){
     console.error(e);
@@ -1935,14 +2055,14 @@ function refreshAdmin(){
     if(requests.some(r=>r.id===current)) clientSelect.value=current;
     syncDealClientInfo();
   }
-  document.getElementById("clientsTable").innerHTML=requests.length?requests.slice().reverse().slice(0,20).map(r=>`<tr><td>${esc(r.name)}</td><td>${esc(r.phone)}</td><td>${r.tx==="rent"?"إيجار":"شراء"} — ${esc(r.type||"أي نوع")}</td><td>${esc(r.area||r.governorate||"")}</td><td>${r.budget?money(r.budget)+" ج.م":"—"}</td><td><button class="btn ghost" style="padding:6px 10px;font-size:11px" onclick="prepareDeal('', '${esc(r.id)}')">اختيار للربط</button></td></tr>`).join(""):`<tr><td colspan="6">لا توجد طلبات عملاء بعد.</td></tr>`;
+  document.getElementById("clientsTable").innerHTML=requests.length?requests.slice().reverse().slice(0,20).map(r=>`<tr><td>${esc(r.name)}</td><td>${esc(r.phone)}</td><td>${r.tx==="rent"?"إيجار":"شراء"} — ${esc(r.type||"أي نوع")}</td><td>${esc(r.area||r.governorate||"")}</td><td>${r.budget?money(r.budget)+" ج.م":"—"}</td><td><div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn ghost" style="padding:6px 10px;font-size:11px" onclick="waClientRequest('${esc(r.id)}')">واتساب</button><button class="btn ghost" style="padding:6px 10px;font-size:11px" onclick="prepareDeal('', '${esc(r.id)}')">اختيار للربط</button></div></td></tr>`).join(""):`<tr><td colspan="6">لا توجد طلبات عملاء بعد.</td></tr>`;
   document.getElementById("dealsTable").innerHTML=deals.slice(0,12).map(d=>{
     const p=properties.find(x=>x.id===d.propertyId)||{};
     const finalPrice=Number(d.finalPrice||d.price||0);
     const comm=Number(d.commission ?? commissionFor(p,d.status,finalPrice));
     return `<tr><td>${d.propertyId}</td><td>${d.unitType||p.type||""}</td><td>${esc(d.client)}</td><td>${statusLabel(d.status)}</td><td>${money(finalPrice)} ج.م</td><td>${money(comm)} ج.م</td><td>${displayDate(d.closeDate||d.date)}</td></tr>`;
   }).join("")||`<tr><td colspan="7">لا توجد صفقات بعد.</td></tr>`;
-  document.getElementById("leadsTable").innerHTML=leads.slice(0,10).map(l=>`<tr><td>${esc(l.propertyId)}</td><td>${esc(l.name)}</td><td>${esc(l.phone)}</td><td>${l.date}</td></tr>`).join("")||`<tr><td colspan="4">لا توجد Leads بعد.</td></tr>`;
+  document.getElementById("leadsTable").innerHTML=leads.slice(0,10).map(l=>`<tr><td>${esc(l.propertyId)}</td><td>${esc(l.name)}</td><td>${esc(l.phone)}</td><td>${l.date}</td><td><div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn ghost" style="padding:6px 10px;font-size:11px" onclick="waClientLead('${esc(l.id)}')">واتساب العميل</button><button class="btn gold" style="padding:6px 10px;font-size:11px" onclick="waOwnerInterest('${esc(l.id)}')">واتساب المالك</button></div></td></tr>`).join("")||`<tr><td colspan="5">لا توجد Leads بعد.</td></tr>`;
   const timelineSel=document.getElementById("timelineProperty");
   timelineSel.innerHTML=properties.map(p=>`<option value="${esc(p.id)}">${esc(p.id)} — ${esc(p.title)}</option>`).join("");
   renderTimeline();
@@ -1953,14 +2073,15 @@ function refreshAdmin(){
     <td>
       <div style="display:flex;gap:6px;flex-wrap:wrap">
         <button class="btn ghost" style="padding:6px 10px;font-size:11px" onclick="openSubmissionReview('${p._docId||p.submissionId}')">معاينة</button>
+        <button class="btn ghost" style="padding:6px 10px;font-size:11px" onclick="waOwnerSubmission('${p._docId||p.submissionId}')">واتساب</button>
         <button class="btn gold" style="padding:6px 10px;font-size:11px" onclick="approveProperty('${p._docId||p.submissionId}')">اعتماد</button>
         <button class="btn ghost" style="padding:6px 10px;font-size:11px;border-color:rgba(216,92,92,.45);color:#f2b0b0" onclick="openRejectSubmission('${p._docId||p.submissionId}')">رفض</button>
       </div>
     </td></tr>
   `).join(""):`<tr><td colspan="4">لا توجد عقارات تحت المراجعة حاليًا.</td></tr>`;
 
-  document.getElementById("notifTable").innerHTML=notifications.length?notifications.slice(0,10).map(n=>`
-    <tr><td>${esc(n.clientName)}</td><td>${esc(n.clientPhone)}</td><td>${esc(n.propertyId)} — ${esc(n.propertyTitle)}</td><td>${n.score}%</td><td>${n.date}</td><td><button class="btn gold" style="padding:6px 10px;font-size:11px" onclick="prepareDeal('${esc(n.propertyId)}','${esc(n.clientRequestId||"")}')">ربط</button></td></tr>
+  document.getElementById("notifTable").innerHTML=notifications.length?notifications.slice(0,10).map((n,i)=>`
+    <tr><td>${esc(n.clientName)}</td><td>${esc(n.clientPhone)}</td><td>${esc(n.propertyId)} — ${esc(n.propertyTitle)}</td><td>${n.score}%</td><td>${n.date}</td><td><div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn ghost" style="padding:6px 10px;font-size:11px" onclick="waClientMatch(${i})">واتساب</button><button class="btn gold" style="padding:6px 10px;font-size:11px" onclick="prepareDeal('${esc(n.propertyId)}','${esc(n.clientRequestId||"")}')">ربط</button></div></td></tr>
   `).join(""):`<tr><td colspan="6">لا توجد تنبيهات مطابقة بعد.</td></tr>`;
 
   refreshAdminLocationControls();
