@@ -390,7 +390,7 @@ th{color:#8f9ba7}
 <footer>
   <div class="shell footer-row">
     <div><b style="color:#fff">عنوانك ENWANAK</b> — عقارات من المالك مباشرة في مصر</div>
-    <div>ENWANAK V8.5 · Firebase Workflow + Storage + Clients + FCM</div>
+    <div>ENWANAK V8.10 · Admin Edit/Delete + Full Details Preview + Image Management</div>
   </div>
 </footer>
 
@@ -547,6 +547,16 @@ th{color:#8f9ba7}
   <h4 style="margin:24px 0 10px;color:var(--gold2)">عقارات تحت المراجعة</h4>
   <div class="tablewrap"><table><thead><tr><th>العقار</th><th>المنطقة</th><th>السعر</th><th>المراجعة</th></tr></thead><tbody id="reviewTable"></tbody></table></div>
 
+
+  <h4 style="margin:24px 0 10px;color:var(--gold2)">إدارة العقارات المنشورة</h4>
+  <div class="note" style="margin-bottom:10px">
+    يمكنك معاينة أو تعديل بيانات وصور أي إعلان منشور، أو حذفه من الموقع. حذف الإعلان لا يحذف سجل العمليات المالية التاريخي.
+  </div>
+  <div class="tablewrap"><table>
+    <thead><tr><th>العقار</th><th>المنطقة</th><th>الحالة</th><th>السعر</th><th>إدارة</th></tr></thead>
+    <tbody id="publishedAdminTable"></tbody>
+  </table></div>
+
   <h4 style="margin:24px 0 10px;color:var(--gold2)">تنبيهات مطابقة جديدة</h4>
   <div class="tablewrap"><table><thead><tr><th>العميل</th><th>الهاتف</th><th>العقار المطابق</th><th>نسبة التطابق</th><th>التاريخ</th><th></th></tr></thead><tbody id="notifTable"></tbody></table></div>
 
@@ -615,6 +625,40 @@ th{color:#8f9ba7}
 </div></div>
 
 
+
+<div class="modal" id="editPropertyModal"><div class="modal-box" style="width:min(980px,100%)">
+  <div class="modal-head"><h3>تعديل الإعلان المنشور</h3><button class="close" onclick="closeModal('editPropertyModal')">✕</button></div>
+  <input type="hidden" id="editPropertyId">
+  <div id="editPropertyCurrentImages" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px"></div>
+  <div class="form-grid">
+    <div class="field"><label>عنوان الإعلان</label><input id="editTitle"></div>
+    <div class="field"><label>بيع / إيجار</label><select id="editTx"><option value="sale">بيع</option><option value="rent">إيجار</option></select></div>
+    <div class="field"><label>سكني / إداري</label><select id="editKind"><option value="residential">سكني</option><option value="admin">إداري</option></select></div>
+    <div class="field"><label>المحافظة</label><select id="editGov" onchange="refillEditAreas()"></select></div>
+    <div class="field"><label>المنطقة / المدينة</label><select id="editArea" data-allow-custom="1"></select></div>
+    <div class="field"><label>نوع العقار</label><select id="editType"><option>شقة</option><option>فيلا</option><option>دوبلكس</option><option>بنتهاوس</option><option>مقر إداري</option></select></div>
+    <div class="field"><label>المساحة م²</label><input id="editSize" type="number" min="0"></div>
+    <div class="field"><label>السعر</label><input id="editPrice" type="number" min="0"></div>
+    <div class="field"><label>الحالة</label>
+      <select id="editStatus">
+        <option value="available">متاح</option>
+        <option value="reserved">محجوز</option>
+        <option value="contract">تحت التعاقد</option>
+        <option value="sold">تم البيع</option>
+        <option value="rented">تم التأجير</option>
+      </select>
+    </div>
+  </div>
+  <div class="field"><label>تفاصيل / وصف الإعلان</label><textarea id="editDescription" rows="6" placeholder="اكتب كل تفاصيل العقار التي تريد أن تظهر للعميل"></textarea></div>
+  <div class="field">
+    <label>إضافة صور جديدة</label>
+    <input id="editNewImages" type="file" multiple accept="image/*">
+    <div class="note" style="margin-top:6px">يمكن إضافة حتى 6 صور جديدة في المرة الواحدة، بحد أقصى 5MB للصورة.</div>
+  </div>
+  <div id="editPropertyStatus" class="note" style="display:none;margin-bottom:10px"></div>
+  <button class="btn gold" style="width:100%" onclick="savePropertyEdits()">حفظ التعديلات</button>
+</div></div>
+
 <div class="modal" id="submissionReviewModal"><div class="modal-box" style="width:min(980px,100%)">
   <div class="modal-head"><h3>معاينة العقار قبل الاعتماد</h3><button class="close" onclick="closeModal('submissionReviewModal')">✕</button></div>
   <div id="submissionReviewBody"></div>
@@ -643,7 +687,7 @@ th{color:#8f9ba7}
 </div></div>
 
 
-<!-- ENWANAK V8.9: V8.8 + admin WhatsApp CRM shortcuts for owners and clients -->
+<!-- ENWANAK V8.10: V8.9 + full property details + admin edit/delete + image management -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
 import {
@@ -758,6 +802,27 @@ window.ENW_DB = {
       rejectedAt:new Date().toISOString(),
       rejectedBy:auth.currentUser?.email||ADMIN_EMAIL
     }),{merge:true});
+  },
+  async uploadPublishedImages(propertyId,files){
+    const urls=[];
+    for(let i=0;i<files.length;i++){
+      const file=files[i];
+      if(!file.type.startsWith("image/")) throw new Error("يسمح برفع الصور فقط");
+      if(file.size > 5 * 1024 * 1024) throw new Error("الحد الأقصى للصورة الواحدة 5MB");
+      const ext=(file.name.split(".").pop()||"jpg").replace(/[^a-zA-Z0-9]/g,"").slice(0,8)||"jpg";
+      const path=`published-properties/${propertyId}/${Date.now()}-${String(i+1).padStart(2,"0")}.${ext}`;
+      const r=storageRef(storage,path);
+      await uploadBytes(r,file,{contentType:file.type,customMetadata:{propertyId}});
+      urls.push(await getDownloadURL(r));
+    }
+    return urls;
+  },
+  async deleteProperty(propertyId){
+    await Promise.all([
+      deleteDoc(doc(db,"properties",propertyId)),
+      deleteDoc(doc(db,"owners",propertyId)),
+      deleteDoc(doc(db,"timelines",propertyId))
+    ]);
   },
   async updateProperty(p){ await setDoc(doc(db,"properties",p.id),clean(p),{merge:true}); },
   async saveDeal(deal){ await setDoc(doc(db,"deals",deal.id),clean(deal)); },
@@ -1701,6 +1766,7 @@ function openProperty(id){
           <div class="detail-item"><span>الغرض</span><b>${p.tx==="sale"?"بيع":"إيجار"}</b></div>
           <div class="detail-item"><span>التصنيف</span><b>${p.kind==="admin"?"إداري":"سكني"}</b></div>
         </div>
+        ${p.description?`<div class="detail-item" style="margin-top:12px"><span>تفاصيل الإعلان</span><b style="white-space:pre-wrap;line-height:1.9;font-weight:600">${esc(p.description)}</b></div>`:`<div class="note" style="margin-top:12px">لا توجد تفاصيل إضافية مسجلة لهذا الإعلان.</div>`}
         <div class="owner">✓ مالك مباشر — رقم المالك غير معروض للعامة</div>
         <button class="btn gold" style="width:100%;margin-top:16px;${p.status!=="available"?'opacity:.55':''}" ${p.status!=="available"?'disabled':''} onclick="closeModal('propertyModal');openInterest('${esc(p.id)}')">${p.status==="available"?"مهتم بالعقار":statusLabel(p.status)}</button>
         <button class="btn ghost" style="width:100%;margin-top:10px" onclick="shareOnWhatsApp('${esc(p.id)}')">شارك العقار على واتساب</button>
@@ -1773,6 +1839,142 @@ async function approveProperty(id){
   }catch(e){ console.error(e); alert("تعذر اعتماد العقار في Firebase."); }
 }
 
+
+let editPropertyGallery=[];
+
+function renderPublishedAdminTable(){
+  const body=document.getElementById("publishedAdminTable");
+  if(!body)return;
+  body.innerHTML=properties.length?properties.map(p=>`
+    <tr>
+      <td>${esc(p.id)} — ${esc(p.title||"")}</td>
+      <td>${esc(p.area||"")} — ${esc(p.governorate||"القاهرة")}</td>
+      <td>${statusLabel(p.status)}</td>
+      <td>${money(Number(p.price||0))} ج.م</td>
+      <td>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <button class="btn ghost" style="padding:6px 10px;font-size:11px" onclick="openProperty('${esc(p.id)}')">معاينة</button>
+          <button class="btn gold" style="padding:6px 10px;font-size:11px" onclick="openEditProperty('${esc(p.id)}')">تعديل</button>
+          <button class="btn ghost" style="padding:6px 10px;font-size:11px;border-color:rgba(216,92,92,.45);color:#f2b0b0" onclick="deletePublishedProperty('${esc(p.id)}')">حذف</button>
+        </div>
+      </td>
+    </tr>`).join(""):`<tr><td colspan="5">لا توجد عقارات منشورة.</td></tr>`;
+}
+
+function refillEditAreas(){
+  const gov=document.getElementById("editGov")?.value||"";
+  const area=document.getElementById("editArea");
+  if(!area)return;
+  const items=areasByGovernorate[gov]||[];
+  const current=area.dataset.current||area.value||"";
+  area.innerHTML=items.map(a=>`<option value="${esc(a)}">${esc(a)}</option>`).join("");
+  if(current && items.includes(current)) area.value=current;
+  area.dataset.current="";
+}
+
+function renderEditImages(){
+  const box=document.getElementById("editPropertyCurrentImages");
+  if(!box)return;
+  box.innerHTML=editPropertyGallery.length?editPropertyGallery.map((url,i)=>`
+    <div style="width:150px">
+      <img src="${esc(url)}" style="width:150px;height:110px;object-fit:cover;border-radius:12px;border:1px solid var(--line)">
+      <button class="btn ghost" style="width:100%;padding:6px;margin-top:5px;font-size:11px;border-color:rgba(216,92,92,.45);color:#f2b0b0" onclick="removeEditImage(${i})">إزالة الصورة</button>
+    </div>`).join(""):`<div class="note" style="width:100%">لا توجد صور حالية. يمكنك إضافة صور جديدة.</div>`;
+}
+
+function removeEditImage(index){
+  editPropertyGallery.splice(index,1);
+  renderEditImages();
+}
+
+function openEditProperty(id){
+  const p=properties.find(x=>x.id===id); if(!p)return;
+  document.getElementById("editPropertyId").value=id;
+  document.getElementById("editTitle").value=p.title||"";
+  document.getElementById("editDescription").value=p.description||"";
+  document.getElementById("editTx").value=p.tx||"sale";
+  document.getElementById("editKind").value=p.kind||"residential";
+  document.getElementById("editType").value=p.type||"شقة";
+  document.getElementById("editSize").value=p.size||"";
+  document.getElementById("editPrice").value=p.price||"";
+  document.getElementById("editStatus").value=p.status||"available";
+  const govSel=document.getElementById("editGov");
+  govSel.innerHTML=egyptGovernorates.map(g=>`<option value="${esc(g)}">${esc(g)}</option>`).join("");
+  govSel.value=p.governorate||"القاهرة";
+  document.getElementById("editArea").dataset.current=p.area||"";
+  refillEditAreas();
+  editPropertyGallery=(Array.isArray(p.gallery)&&p.gallery.length?p.gallery:[p.img].filter(Boolean)).slice();
+  renderEditImages();
+  document.getElementById("editNewImages").value="";
+  const st=document.getElementById("editPropertyStatus"); st.style.display="none"; st.textContent="";
+  openModal("editPropertyModal");
+}
+
+async function savePropertyEdits(){
+  const id=document.getElementById("editPropertyId").value;
+  const p=properties.find(x=>x.id===id); if(!p)return;
+  const title=document.getElementById("editTitle").value.trim();
+  const size=Number(document.getElementById("editSize").value);
+  const price=Number(document.getElementById("editPrice").value);
+  if(!title||!size||!price){ alert("العنوان والمساحة والسعر بيانات مطلوبة."); return; }
+  const st=document.getElementById("editPropertyStatus");
+  st.style.display="block"; st.textContent="جارٍ حفظ التعديلات…";
+  try{
+    const files=[...document.getElementById("editNewImages").files].slice(0,6);
+    let added=[];
+    if(files.length) added=await window.ENW_DB.uploadPublishedImages(id,files);
+    const gallery=[...editPropertyGallery,...added];
+    const updated={
+      ...p,
+      title,
+      description:document.getElementById("editDescription").value.trim(),
+      tx:document.getElementById("editTx").value,
+      kind:document.getElementById("editKind").value,
+      governorate:document.getElementById("editGov").value||"القاهرة",
+      area:document.getElementById("editArea").value||"",
+      type:document.getElementById("editType").value,
+      size,
+      price,
+      status:document.getElementById("editStatus").value,
+      gallery,
+      img:gallery[0]||"",
+      published:true,
+      updatedAt:new Date().toISOString()
+    };
+    await window.ENW_DB.updateProperty(updated);
+    const i=properties.findIndex(x=>x.id===id);
+    if(i>=0) properties[i]=updated;
+    renderProperties();
+    renderPublishedAdminTable();
+    st.textContent="تم حفظ التعديلات بنجاح.";
+    setTimeout(()=>closeModal("editPropertyModal"),700);
+  }catch(e){
+    console.error(e);
+    st.textContent="تعذر حفظ التعديلات: "+String(e?.message||e);
+  }
+}
+
+async function deletePublishedProperty(id){
+  const p=properties.find(x=>x.id===id); if(!p)return;
+  const hasDeals=deals.some(d=>d.propertyId===id);
+  const warning=hasDeals
+    ? `هذا العقار مرتبط بسجل عمليات سابق. سيتم حذف الإعلان وبيانات المالك وسجل الـTimeline من الموقع، مع الاحتفاظ بسجل العمليات المالية. هل تريد المتابعة؟`
+    : `سيتم حذف إعلان ${id} من الموقع نهائيًا. هل تريد المتابعة؟`;
+  if(!confirm(warning))return;
+  try{
+    await window.ENW_DB.deleteProperty(id);
+    properties=properties.filter(x=>x.id!==id);
+    delete timelines[id];
+    renderProperties();
+    renderPublishedAdminTable();
+    refreshAdmin();
+    alert("تم حذف الإعلان من الموقع.");
+  }catch(e){
+    console.error(e);
+    alert("تعذر حذف الإعلان من Firebase.");
+  }
+}
+
 function submissionTxLabel(v){ return v==="rent"?"إيجار":"بيع"; }
 function submissionKindLabel(v){ return v==="admin"?"إداري":"سكني"; }
 
@@ -1800,7 +2002,7 @@ function openSubmissionReview(id){
         <div class="detail-item"><span>اسم المالك</span><b>${esc(sub.ownerName||"—")}</b></div>
         <div class="detail-item"><span>هاتف المالك</span><b dir="ltr">${esc(sub.ownerPhone||"—")}</b></div>
       </div>
-      <div class="detail-item" style="margin-top:10px"><span>وصف العقار</span><b style="white-space:normal;line-height:1.8">${esc(sub.description||"لا يوجد وصف")}</b></div>
+      <div class="detail-item" style="margin-top:10px"><span>وصف العقار</span><b style="white-space:normal;line-height:1.8">${esc(sub.description||sub.details||sub.notes||"لا توجد تفاصيل إضافية مسجلة.")}</b></div>
       <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px">
         <button class="btn ghost" style="flex:1;min-width:160px" onclick="waOwnerSubmission('${esc(id)}')">واتساب المالك</button>
         <button class="btn gold" style="flex:1;min-width:160px" onclick="approveFromReview('${esc(id)}')">اعتماد العقار</button>
@@ -2068,6 +2270,7 @@ function refreshAdmin(){
   renderTimeline();
 
   const pending=pendingSubmissions;
+  renderPublishedAdminTable();
   document.getElementById("reviewTable").innerHTML=pending.length?pending.map(p=>`
     <tr><td>${esc(p.submissionId||p._docId)} — ${esc(p.title)}</td><td>${esc(p.area||"")} — ${esc(p.governorate||"القاهرة")}</td><td>${money(Number(p.price||0))} ج.م</td>
     <td>
