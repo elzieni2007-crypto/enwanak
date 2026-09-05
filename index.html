@@ -292,6 +292,7 @@ th{color:#8f9ba7}
             <button class="active" data-value="" onclick="toggleSegment(this,'kindSegment')">الكل</button>
             <button data-value="residential" onclick="toggleSegment(this,'kindSegment')">سكني</button>
             <button data-value="admin" onclick="toggleSegment(this,'kindSegment')">إداري</button>
+            <button data-value="commercial" onclick="toggleSegment(this,'kindSegment')">تجاري</button>
           </div>
         </div>
         <div class="search-grid">
@@ -304,7 +305,7 @@ th{color:#8f9ba7}
             <select id="areaSelect" data-allow-custom="1"><option value="">المنطقة / المدينة</option></select>
           </div>
           <div class="control"><label>نوع العقار</label>
-            <select id="typeSelect"><option value="">كل الأنواع</option><option>شقة</option><option>فيلا</option><option>دوبلكس</option><option>بنتهاوس</option><option>مقر إداري</option></select>
+            <select id="typeSelect"><option value="">كل الأنواع</option><option>شقة</option><option>فيلا</option><option>دوبلكس</option><option>بنتهاوس</option><option>مقر إداري</option><option>محل تجاري</option></select>
           </div>
           <div class="control"><label>المساحة</label><input id="minArea" type="number" placeholder="100 م²"></div>
           <div class="control"><label>السعر</label><input id="maxPrice" type="number" placeholder="10,000,000"></div>
@@ -390,7 +391,7 @@ th{color:#8f9ba7}
 <footer>
   <div class="shell footer-row">
     <div><b style="color:#fff">عنوانك ENWANAK</b> — عقارات من المالك مباشرة في مصر</div>
-    <div>ENWANAK V8.10 · Admin Edit/Delete + Full Details Preview + Image Management</div>
+    <div>ENWANAK V8.11 · Residential + Administrative + Commercial Classification</div>
   </div>
 </footer>
 
@@ -404,7 +405,7 @@ th{color:#8f9ba7}
     <div class="field"><label>اسم المالك <b style="color:#f4d28a">*</b></label><input id="oName" required></div>
     <div class="field"><label>رقم الموبايل <b style="color:#f4d28a">*</b></label><input id="oPhone" required></div>
     <div class="field"><label>بيع / إيجار</label><select id="oTx"><option value="sale">بيع</option><option value="rent">إيجار</option></select></div>
-    <div class="field"><label>سكني / إداري</label><select id="oKind"><option value="residential">سكني</option><option value="admin">إداري</option></select></div>
+    <div class="field"><label>التصنيف</label><select id="oKind"><option value="residential">سكني</option><option value="admin">إداري</option><option value="commercial">تجاري</option></select></div>
     <div class="field"><label>المحافظة</label><select id="oGov"></select></div>
     <div class="field"><label>المنطقة / المدينة</label><select id="oArea" data-allow-custom="1"></select></div>
     <div class="field"><label>نوع العقار</label><select id="oType"><option>شقة</option><option>فيلا</option><option>دوبلكس</option><option>بنتهاوس</option><option>مقر إداري</option></select></div>
@@ -441,7 +442,7 @@ th{color:#8f9ba7}
       <select id="rTx"><option value="sale">شراء</option><option value="rent">إيجار</option></select>
     </div>
     <div class="field"><label>التصنيف</label>
-      <select id="rKind"><option value="residential">سكني</option><option value="admin">إداري</option></select>
+      <select id="rKind"><option value="residential">سكني</option><option value="admin">إداري</option><option value="commercial">تجاري</option></select>
     </div>
 
     <div class="field"><label>المحافظة</label><select id="rGov"></select></div>
@@ -451,7 +452,7 @@ th{color:#8f9ba7}
     <div class="field"><label>نوع الوحدة</label>
       <select id="rType">
         <option value="">أي نوع</option><option>شقة</option><option>فيلا</option><option>دوبلكس</option>
-        <option>بنتهاوس</option><option>مقر إداري</option>
+        <option>بنتهاوس</option><option>مقر إداري</option><option>محل تجاري</option>
       </select>
     </div>
     <div class="field"><label>التشطيب</label>
@@ -594,7 +595,7 @@ th{color:#8f9ba7}
     <div class="field"><label>من تاريخ</label><input id="reportFrom" type="date" onchange="renderReports()"></div>
     <div class="field"><label>إلى تاريخ</label><input id="reportTo" type="date" onchange="renderReports()"></div>
     <div class="field"><label>المحافظة</label><select id="reportGov" onchange="renderReports()"></select></div>
-    <div class="field"><label>نوع الوحدة</label><select id="reportKind" onchange="renderReports()"><option value="">الكل</option><option value="residential">سكني</option><option value="admin">إداري</option></select></div>
+    <div class="field"><label>نوع الوحدة</label><select id="reportKind" onchange="renderReports()"><option value="">الكل</option><option value="residential">سكني</option><option value="admin">إداري</option><option value="commercial">تجاري</option></select></div>
     <div class="field"><label>نوع العملية</label><select id="reportTx" onchange="renderReports()"><option value="">الكل</option><option value="sale">بيع</option><option value="rent">إيجار</option></select></div>
     <div class="field"><label>حالة الصفقة</label><select id="reportStatus" onchange="renderReports()"><option value="">الكل</option><option value="sold">تم البيع</option><option value="rented">تم التأجير</option><option value="reserved">محجوز</option><option value="contract">تحت التعاقد</option></select></div>
   </div>
@@ -633,10 +634,10 @@ th{color:#8f9ba7}
   <div class="form-grid">
     <div class="field"><label>عنوان الإعلان</label><input id="editTitle"></div>
     <div class="field"><label>بيع / إيجار</label><select id="editTx"><option value="sale">بيع</option><option value="rent">إيجار</option></select></div>
-    <div class="field"><label>سكني / إداري</label><select id="editKind"><option value="residential">سكني</option><option value="admin">إداري</option></select></div>
+    <div class="field"><label>التصنيف</label><select id="editKind" onchange="setTypeOptions('editType',this.value,false)"><option value="residential">سكني</option><option value="admin">إداري</option><option value="commercial">تجاري</option></select></div>
     <div class="field"><label>المحافظة</label><select id="editGov" onchange="refillEditAreas()"></select></div>
     <div class="field"><label>المنطقة / المدينة</label><select id="editArea" data-allow-custom="1"></select></div>
-    <div class="field"><label>نوع العقار</label><select id="editType"><option>شقة</option><option>فيلا</option><option>دوبلكس</option><option>بنتهاوس</option><option>مقر إداري</option></select></div>
+    <div class="field"><label>نوع العقار</label><select id="editType"><option>شقة</option><option>فيلا</option><option>دوبلكس</option><option>بنتهاوس</option><option>مقر إداري</option><option>محل تجاري</option></select></div>
     <div class="field"><label>المساحة م²</label><input id="editSize" type="number" min="0"></div>
     <div class="field"><label>السعر</label><input id="editPrice" type="number" min="0"></div>
     <div class="field"><label>الحالة</label>
@@ -687,7 +688,7 @@ th{color:#8f9ba7}
 </div></div>
 
 
-<!-- ENWANAK V8.10: V8.9 + full property details + admin edit/delete + image management -->
+<!-- ENWANAK V8.11: V8.10 + commercial classification and commercial shop subtype -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
 import {
@@ -1180,7 +1181,8 @@ function setTypeOptions(selectId, kind, includeAny=true){
   const current=el.value;
   const residential=["شقة","فيلا","دوبلكس","بنتهاوس"];
   const admin=["مقر إداري"];
-  const items=kind==="residential"?residential:kind==="admin"?admin:[...residential,...admin];
+  const commercial=["محل تجاري"];
+  const items=kind==="residential"?residential:kind==="admin"?admin:kind==="commercial"?commercial:[...residential,...admin,...commercial];
   el.innerHTML=(includeAny?`<option value="">${selectId==="typeSelect"?"كل الأنواع":"أي نوع"}</option>`:"")+items.map(x=>`<option>${x}</option>`).join("");
   if(items.includes(current)) el.value=current;
 }
@@ -1188,6 +1190,7 @@ function syncKindTypeFields(){
   setTypeOptions("typeSelect",currentValue("kindSegment"),true);
   const ok=document.getElementById("oKind")?.value||"residential"; setTypeOptions("oType",ok,false);
   const rk=document.getElementById("rKind")?.value||"residential"; setTypeOptions("rType",rk,true);
+  const ek=document.getElementById("editKind")?.value||"residential"; setTypeOptions("editType",ek,false);
 }
 function toggleSegment(el,id){document.querySelectorAll(`#${id} button`).forEach(b=>b.classList.remove("active"));el.classList.add("active");if(id==="kindSegment") setTypeOptions("typeSelect",el.dataset.value,true);renderProperties()}
 function quickArea(a){
@@ -1764,7 +1767,7 @@ function openProperty(id){
           <div class="detail-item"><span>المساحة</span><b>${p.size} م²</b></div>
           <div class="detail-item"><span>النوع</span><b>${esc(p.type)}</b></div>
           <div class="detail-item"><span>الغرض</span><b>${p.tx==="sale"?"بيع":"إيجار"}</b></div>
-          <div class="detail-item"><span>التصنيف</span><b>${p.kind==="admin"?"إداري":"سكني"}</b></div>
+          <div class="detail-item"><span>التصنيف</span><b>${p.kind==="admin"?"إداري":p.kind==="commercial"?"تجاري":"سكني"}</b></div>
         </div>
         ${p.description?`<div class="detail-item" style="margin-top:12px"><span>تفاصيل الإعلان</span><b style="white-space:pre-wrap;line-height:1.9;font-weight:600">${esc(p.description)}</b></div>`:`<div class="note" style="margin-top:12px">لا توجد تفاصيل إضافية مسجلة لهذا الإعلان.</div>`}
         <div class="owner">✓ مالك مباشر — رقم المالك غير معروض للعامة</div>
@@ -1894,7 +1897,8 @@ function openEditProperty(id){
   document.getElementById("editDescription").value=p.description||"";
   document.getElementById("editTx").value=p.tx||"sale";
   document.getElementById("editKind").value=p.kind||"residential";
-  document.getElementById("editType").value=p.type||"شقة";
+  setTypeOptions("editType",p.kind||"residential",false);
+  document.getElementById("editType").value=p.type||((p.kind==="admin")?"مقر إداري":(p.kind==="commercial"?"محل تجاري":"شقة"));
   document.getElementById("editSize").value=p.size||"";
   document.getElementById("editPrice").value=p.price||"";
   document.getElementById("editStatus").value=p.status||"available";
@@ -1976,7 +1980,7 @@ async function deletePublishedProperty(id){
 }
 
 function submissionTxLabel(v){ return v==="rent"?"إيجار":"بيع"; }
-function submissionKindLabel(v){ return v==="admin"?"إداري":"سكني"; }
+function submissionKindLabel(v){ return v==="admin"?"إداري":v==="commercial"?"تجاري":"سكني"; }
 
 function openSubmissionReview(id){
   const sub=pendingSubmissions.find(x=>(x._docId||x.submissionId)===id); if(!sub)return;
@@ -2197,7 +2201,7 @@ function renderReports(){
         <td>${d.propertyId}</td>
         <td>${d.governorate||p.governorate||"القاهرة"}</td>
         <td>${d.area||p.area||""}</td>
-        <td>${d.unitType||p.type||""} — ${kind==="admin"?"إداري":"سكني"}</td>
+        <td>${d.unitType||p.type||""} — ${kind==="admin"?"إداري":kind==="commercial"?"تجاري":"سكني"}</td>
         <td>${tx==="sale"?"بيع":"إيجار"}</td>
         <td>${d.client||""}</td>
         <td>${money(finalPrice)} ج.م</td>
