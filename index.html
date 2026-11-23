@@ -24,6 +24,9 @@ header{position:sticky;top:0;z-index:50;background:rgba(6,17,27,.88);backdrop-fi
 .nav{height:82px;display:flex;align-items:center;justify-content:space-between;gap:20px}
 .brand{display:flex;align-items:center;gap:14px;min-width:150px}
 .brand-mark{font-size:30px;font-weight:900;line-height:1}
+.brand{display:flex;align-items:center;gap:12px;color:inherit;text-decoration:none}
+.brand-logo{width:56px;height:56px;border-radius:50%;flex-shrink:0;display:block}
+@media(max-width:430px){.brand-logo{width:44px;height:44px}.brand{gap:8px}.brand-mark{font-size:24px}.brand-mark span{font-size:11px;letter-spacing:4px}}
 .brand-mark span{display:block;font-size:14px;letter-spacing:6px;color:var(--gold);margin-top:4px}
 .navlinks{display:flex;gap:28px;color:#d5dbe2;font-size:14px}
 .navlinks a:hover,.navlinks a.active{color:var(--gold)}
@@ -264,13 +267,19 @@ th{color:#8f9ba7}
 <meta property="og:description" content="بيع وإيجار من المالك مباشرة">
 <meta property="og:url" content="https://elzieni2007-crypto.github.io/enwanak/">
 <meta name="twitter:card" content="summary_large_image">
+<meta property="og:image" content="https://elzieni2007-crypto.github.io/enwanak/og-image.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="عنوانك ENWANAK — سجّل عقارك مجانا، 0% عمولة على المالك">
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="apple-touch-icon" href="logo-192.png">
 </head>
 <body>
 <div class="top-strip">سجّل عقارك مجانا — 0% عمولة على المالك · نتولى تسويق عقارك مجانا · متاح الآن في القاهرة وسوهاج — قريبا باقي محافظات مصر</div>
 
 <header>
   <div class="shell nav">
-    <div class="brand"><div class="brand-mark">عنوانك<span>ENWANAK</span></div></div>
+    <a class="brand" href="./" aria-label="عنوانك ENWANAK"><img class="brand-logo" src="logo-192.png" alt="شعار عنوانك ENWANAK" width="56" height="56"><div class="brand-mark">عنوانك<span>ENWANAK</span></div></a>
     <nav class="navlinks">
       <a class="active" href="#">الرئيسية</a><a href="#properties">بحث</a><a href="#properties">شقق سكنية</a>
       <a href="#properties">عقارات إدارية</a><a href="#owner">طلب عقار</a><a href="#owner">عن عنوانك</a>
@@ -400,8 +409,8 @@ th{color:#8f9ba7}
 
 <footer>
   <div class="shell footer-row">
-    <div><b style="color:#fff">عنوانك ENWANAK</b> — عقارات من المالك مباشرة في مصر · تواصل معنا: <a class="link-gold" href="mailto:enwanakegypt@gmail.com">enwanakegypt@gmail.com</a></div>
-    <div dir="ltr">ENWANAK is a digital real estate platform by <b style="color:#d8b46a">ZAD Digital and Business Solutions</b> · V8.13</div>
+    <div style="display:flex;align-items:center;gap:12px"><img src="logo-192.png" alt="" width="48" height="48" style="border-radius:50%"><span><b style="color:#fff">عنوانك ENWANAK</b> — عقارات من المالك مباشرة في مصر · تواصل معنا: <a class="link-gold" href="mailto:enwanakegypt@gmail.com">enwanakegypt@gmail.com</a></span></div>
+    <div dir="ltr">ENWANAK is a digital real estate platform by <b style="color:#d8b46a">ZAD Digital and Business Solutions</b> · V8.14</div>
   </div>
 </footer>
 
@@ -647,7 +656,7 @@ th{color:#8f9ba7}
   <h4 style="margin:24px 0 10px;color:var(--gold2)">Leads المهتمين بعقارات محددة</h4>
   <div class="tablewrap"><table><thead><tr><th>العقار</th><th>العميل</th><th>الهاتف</th><th>التاريخ</th><th>واتساب</th></tr></thead><tbody id="leadsTable"></tbody></table></div>
 
-  <h4 style="margin:24px 0 10px;color:var(--gold2)">سجل العقار Property Timeline</h4>
+  <h4 style="margin:24px 0 10px;color:var(--gold2)">سجل العقار</h4>
   <div class="form-grid">
     <div class="field"><label>اختر العقار</label><select id="timelineProperty" onchange="renderTimeline()"></select></div>
     <div class="field"><label>أضف حدثا يدويا</label><input id="timelineNote" placeholder="مثال: تمت المعاينة"></div>
@@ -723,7 +732,7 @@ th{color:#8f9ba7}
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
 import {
-  getFirestore, collection, doc, getDocs, getDoc, setDoc, deleteDoc, query, where
+  getFirestore, collection, doc, getDocs, getDoc, setDoc, deleteDoc, query, where, deleteField
 } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
 import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
 import { getMessaging, getToken, onMessage, isSupported } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-messaging.js";
@@ -871,7 +880,11 @@ window.ENW_DB = {
       deleteDoc(doc(db,"timelines",propertyId))
     ]);
   },
-  async updateProperty(p){ await setDoc(doc(db,"properties",p.id),clean(p),{merge:true}); },
+  async updateProperty(p){
+    // Final deal prices stay private in the "deals" collection, never on the public listing.
+    const data=clean({...p}); delete data.finalPrice; data.finalPrice=deleteField();
+    await setDoc(doc(db,"properties",p.id),data,{merge:true});
+  },
   async saveDeal(deal){ await setDoc(doc(db,"deals",deal.id),clean(deal)); },
   async saveTimeline(propertyId,items){ await setDoc(doc(db,"timelines",propertyId),{items}); },
   async saveNotification(n){ await setDoc(doc(db,"notifications",n.id),clean(n)); },
@@ -994,7 +1007,7 @@ const cairoAreas = areasByGovernorate["القاهرة"]; // legacy compatibility
 
 
 const images = [];
-const ENW_PLACEHOLDER = "data:image/svg+xml;charset=UTF-8,"+encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800"><rect width="100%" height="100%" fill="#0d1a28"/><text x="50%" y="46%" text-anchor="middle" fill="#e7b85c" font-family="Arial" font-size="72" font-weight="700">ENWANAK</text><text x="50%" y="57%" text-anchor="middle" fill="#9da8b5" font-family="Arial" font-size="30">Property image pending</text></svg>`);
+const ENW_PLACEHOLDER = "data:image/svg+xml;charset=UTF-8,"+encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800"><rect width="100%" height="100%" fill="#0d1a28"/><text x="50%" y="46%" text-anchor="middle" fill="#e7b85c" font-family="Arial" font-size="72" font-weight="700">ENWANAK</text><text x="50%" y="57%" text-anchor="middle" fill="#9da8b5" font-family="Arial" font-size="34">الصورة قريبا</text></svg>`);
 
 let properties = [];
 let pendingSubmissions = [];
@@ -1815,6 +1828,8 @@ function displayDate(isoOrDisplay){
 }
 function commissionFor(p,status,finalPrice){
   const price=Number(finalPrice||0);
+  // Installment transfer: buyer pays 1% of the ORIGINAL contract price (owner decision 23-11-2026)
+  if(status==="sold" && p?.installment?.contractPrice) return Number(p.installment.contractPrice)*0.01;
   if(status==="sold") return price*0.01;
   if(status==="rented") return price; // one month rent
   return 0;
@@ -1953,7 +1968,7 @@ function openProperty(id){
         <div class="detail-price">${p.installment?'<small style="font-size:13px;color:#9aa6b3">المطلوب للتنازل </small>':''}${money(p.price)} ج.م ${p.tx==="rent"?'<small style="font-size:13px;color:#9aa6b3">/ شهريا</small>':""}</div>
         <div class="commission-box">
           <b>عمولة عنوانك عند إتمام الصفقة فقط:</b><br>
-          ${p.tx==="sale" ? (p.installment?"المشتري: 1% من قيمة البيع (المبلغ المطلوب للتنازل)":"المشتري: 1% من قيمة البيع") : "المستأجر: قيمة إيجار شهر واحد"} · <b>المالك: 0% عمولة</b>
+          ${p.tx==="sale" ? (p.installment?`المشتري: 1% من سعر العقد الأصلي${p.installment.contractPrice?` (${money(Number(p.installment.contractPrice)*0.01)} ج.م)`:""}`:"المشتري: 1% من قيمة البيع") : "المستأجر: قيمة إيجار شهر واحد"} · <b>المالك: 0% عمولة</b>
         </div>
         ${p.installment?installmentDetailHtml(p.installment,p.price):""}
         <div class="detail-grid">
@@ -1969,7 +1984,7 @@ function openProperty(id){
       </div>
     </div>
     <div style="margin-top:24px">
-      <h3 style="color:var(--gold2)">Property Timeline</h3>
+      <h3 style="color:var(--gold2)">سجل العقار</h3>
       <div class="timeline">
         ${tl.length?tl.map(e=>`<div class="timeline-item"><b>${esc(e.label)}</b><small>${esc(e.date)}</small></div>`).join(""):'<div class="timeline-item"><b>لا توجد أحداث مسجلة بعد</b></div>'}
       </div>
@@ -2309,6 +2324,10 @@ async function loadAdminDashboard(){
   properties=(data.properties||[]).map(p=>({...p,governorate:p.governorate||"القاهرة"}));
   pendingSubmissions=(data.submissions||[]).filter(s=>(s.status||"review")==="review"); requests=data.requests||[]; leads=data.leads||[]; deals=data.deals||[];
   timelines=data.timelines||{}; notifications=data.notifications||[];
+  // One-time cleanup: remove any final price still stored on public listings.
+  properties.filter(p=>p.finalPrice!==undefined).forEach(p=>{ window.ENW_DB.updateProperty(p).catch(e=>console.warn("finalPrice cleanup",p.id,e)); });
+  // Keep final prices for admin reports from the private deals records.
+  deals.forEach(d=>{ const p=properties.find(x=>x.id===d.propertyId); if(p && (d.status==="sold"||d.status==="rented") && d.finalPrice) p.finalPrice=d.finalPrice; });
   if(data.locations?.governorates?.length){
     egyptGovernorates=data.locations.governorates; areasByGovernorate=data.locations.areas||areasByGovernorate;
     egyptGovernorates.forEach(g=>{if(!Array.isArray(areasByGovernorate[g])) areasByGovernorate[g]=[];});
