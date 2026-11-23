@@ -40,6 +40,9 @@ header{position:sticky;top:0;z-index:50;background:rgba(6,17,27,.88);backdrop-fi
 .btn.gold{background:linear-gradient(135deg,var(--gold2),var(--gold));color:#19140a;border:none;box-shadow:0 10px 30px rgba(231,184,92,.20)}
 .btn.ghost{background:transparent}
 .location-chip{display:flex;align-items:center;gap:8px;border:1px solid var(--line);padding:11px 14px;border-radius:999px;color:#f7f7f8;font-size:13px}
+.city-select{background:transparent;font-family:inherit;cursor:pointer;-webkit-appearance:none;appearance:none;padding-left:30px;background-image:linear-gradient(45deg,transparent 50%,#d8b46a 50%),linear-gradient(135deg,#d8b46a 50%,transparent 50%);background-position:14px 50%,19px 50%;background-size:5px 5px,5px 5px;background-repeat:no-repeat}
+.city-select option{background:#0b1726;color:#f7f7f8}
+.mobile-menu .city-select{width:100%}
 .hero{position:relative;min-height:650px;display:flex;align-items:center;overflow:hidden}
 .hero::before{
   content:"";position:absolute;inset:0;
@@ -239,6 +242,22 @@ th{color:#8f9ba7}
   .property-card .content,.card .content,.card-body{padding:9px !important}
 }
 
+/* V8.13 installment */
+.installment-box{border:1px solid rgba(231,184,92,.35);background:rgba(231,184,92,.05);border-radius:16px;padding:14px;margin:6px 0 14px}
+.installment-head{color:var(--gold2);font-weight:800;margin-bottom:8px}
+.installment-summary{color:#f4d28a;font-size:13px;font-weight:700}
+.tag.inst-tag{right:auto;left:56px;background:#d8b46a;color:#0b1726}
+/* V8.12 mobile polish */
+@media (max-width: 760px){
+  .hero-copy{padding-top:18px}
+  .switches{display:flex;flex-direction:column;gap:8px}
+  .switches .segment{width:100%;display:flex;box-sizing:border-box}
+  .switches .segment button{flex:1;min-width:0;padding-left:6px;padding-right:6px}
+  .card-body > div[style*="display:flex"]{flex-wrap:wrap}
+  .card-body > div[style*="display:flex"] .btn{flex:1 1 calc(50% - 4px) !important;min-width:0;font-size:13px}
+  .card-body > div[style*="display:flex"] .btn.gold{flex-basis:100% !important}
+  .admin-fab{width:40px !important;height:40px !important;font-size:16px !important;opacity:.55;bottom:12px !important;left:12px !important}
+}
 </style>
 <meta property="og:type" content="website">
 <meta property="og:title" content="عنوانك | ENWANAK">
@@ -247,7 +266,7 @@ th{color:#8f9ba7}
 <meta name="twitter:card" content="summary_large_image">
 </head>
 <body>
-<div class="top-strip">سجّل عقارك مجانًا — 0% عمولة على المالك · نتولى تسويق عقارك مجانًا · القاهرة والعاصمة الإدارية — قريبًا باقي محافظات مصر</div>
+<div class="top-strip">سجّل عقارك مجانا — 0% عمولة على المالك · نتولى تسويق عقارك مجانا · متاح الآن في القاهرة وسوهاج — قريبا باقي محافظات مصر</div>
 
 <header>
   <div class="shell nav">
@@ -257,8 +276,8 @@ th{color:#8f9ba7}
       <a href="#properties">عقارات إدارية</a><a href="#owner">طلب عقار</a><a href="#owner">عن عنوانك</a>
     </nav>
     <div class="nav-actions">
-      <div class="location-chip">⌖ القاهرة⌄</div>
-      <button class="btn gold" onclick="openOwnerFromCampaign()">＋ أضف عقارك مجانًا</button>
+      <select class="location-chip city-select" aria-label="اختر المحافظة" onchange="setActiveCity(this.value)"><option value="">⌖ كل المحافظات</option><option value="القاهرة">⌖ القاهرة</option><option value="سوهاج">⌖ سوهاج</option></select>
+      <button class="btn gold" onclick="openOwnerFromCampaign()">＋ أضف عقارك مجانا</button>
       <button class="hamburger" onclick="toggleMobileMenu()" aria-label="فتح القائمة">☰</button>
     </div>
   </div>
@@ -269,8 +288,8 @@ th{color:#8f9ba7}
     <a href="#properties" onclick="toggleMobileMenu()">عقارات إدارية</a>
     <a href="#owner" onclick="toggleMobileMenu()">طلب عقار</a>
     <a href="#owner" onclick="toggleMobileMenu()">عن عنوانك</a>
-    <div class="location-chip">⌖ القاهرة⌄</div>
-    <button class="btn gold" onclick="toggleMobileMenu();openModal('ownerModal')">＋ أضف عقارك مجانًا</button>
+    <select class="location-chip city-select" aria-label="اختر المحافظة" onchange="setActiveCity(this.value)"><option value="">⌖ كل المحافظات</option><option value="القاهرة">⌖ القاهرة</option><option value="سوهاج">⌖ سوهاج</option></select>
+    <button class="btn gold" onclick="toggleMobileMenu();openModal('ownerModal')">＋ أضف عقارك مجانا</button>
   </div>
 </header>
 
@@ -278,8 +297,8 @@ th{color:#8f9ba7}
   <div class="shell hero-inner">
     <div class="hero-copy">
       <span class="eyebrow">✦ عقارات مختارة من ملاك مباشرين</span>
-      <h1><span>عقارات فاخرة</span><br>من المالك مباشرة في القاهرة</h1>
-      <p>سكني وإداري للبيع أو الإيجار في القاهرة والعاصمة الإدارية، مع حالة محدثة لكل وحدة ومتابعة من أول الاهتمام حتى التعاقد — بدون عمولة على المالك.</p>
+      <h1 id="heroTitle"><span>عقارات مختارة</span><br>من المالك مباشرة في مصر</h1>
+      <p id="heroText">سكني وإداري وتجاري للبيع أو الإيجار في القاهرة وسوهاج، مع حالة محدثة لكل وحدة ومتابعة من أول الاهتمام حتى التعاقد — بدون عمولة على المالك.</p>
 
       <div class="search-panel">
         <div class="switches">
@@ -287,6 +306,7 @@ th{color:#8f9ba7}
             <button class="active" data-value="" onclick="toggleSegment(this,'txSegment')">الكل</button>
             <button data-value="sale" onclick="toggleSegment(this,'txSegment')">شراء</button>
             <button data-value="rent" onclick="toggleSegment(this,'txSegment')">إيجار</button>
+            <button data-value="installment" onclick="toggleSegment(this,'txSegment')">تقسيط</button>
           </div>
           <div class="segment" id="kindSegment">
             <button class="active" data-value="" onclick="toggleSegment(this,'kindSegment')">الكل</button>
@@ -311,17 +331,7 @@ th{color:#8f9ba7}
           <div class="control"><label>السعر</label><input id="maxPrice" type="number" placeholder="10,000,000"></div>
           <button class="search-btn" onclick="renderProperties()">⌕ بحث</button>
         </div>
-        <div class="area-chips">
-          <button class="chip" onclick="quickArea('العاصمة الإدارية الجديدة')">العاصمة الإدارية</button>
-          <button class="chip" onclick="quickArea('التجمع الخامس')">التجمع الخامس</button>
-          <button class="chip" onclick="quickArea('المعادي')">المعادي</button>
-          <button class="chip" onclick="quickArea('مدينة نصر')">مدينة نصر</button>
-          <button class="chip" onclick="quickArea('مصر الجديدة')">مصر الجديدة</button>
-          <button class="chip" onclick="quickArea('الزمالك')">الزمالك</button>
-          <button class="chip" onclick="quickArea('المقطم')">المقطم</button>
-          <button class="chip" onclick="quickArea('الشروق')">الشروق</button>
-          <button class="chip" onclick="quickArea('مدينتي')">مدينتي</button>
-        </div>
+        <div class="area-chips" id="areaChips"></div>
       </div>
     </div>
   </div>
@@ -347,7 +357,7 @@ th{color:#8f9ba7}
       <aside class="request-card">
         <div class="request-content">
           <h3>مش لاقي <span>المناسب؟</span></h3>
-          <p>اكتب مواصفات العقار وميزانيتك بالتفصيل، وعنوانك يطابق طلبك فورًا مع الوحدات المتاحة والجديدة.</p>
+          <p>اكتب مواصفات العقار وميزانيتك بالتفصيل، وعنوانك يطابق طلبك فورا مع الوحدات المتاحة والجديدة.</p>
           <button class="btn gold" onclick="openModal('requestModal')">اطلب عقارك بالمواصفات ←</button>
         </div>
       </aside>
@@ -376,7 +386,7 @@ th{color:#8f9ba7}
         <h2>عندك عقار؟<br><span style="color:var(--gold2)">اعرضه بشكل يليق به.</span></h2>
         <p>سجّل الوحدة والصور والسعر، ونحن نحفظ بياناتك داخل النظام. وعند وجود عميل جاد يتم ربطه بالعقار وتحديث الحالة حتى التعاقد.</p>
         <div class="owner-points">
-          <div class="owner-point">✓ تسجيل مجاني و0% عمولة على المالك — ونتولى تسويق عقارك مجانًا</div>
+          <div class="owner-point">✓ تسجيل مجاني و0% عمولة على المالك — ونتولى تسويق عقارك مجانا</div>
           <div class="owner-point">✓ صور متعددة لكل وحدة</div>
           <div class="owner-point">✓ رقم عقار مميز</div>
           <div class="owner-point">✓ سجل كامل للصفقة</div>
@@ -390,8 +400,8 @@ th{color:#8f9ba7}
 
 <footer>
   <div class="shell footer-row">
-    <div><b style="color:#fff">عنوانك ENWANAK</b> — عقارات من المالك مباشرة في مصر</div>
-    <div>ENWANAK V8.11 · Residential + Administrative + Commercial Classification</div>
+    <div><b style="color:#fff">عنوانك ENWANAK</b> — عقارات من المالك مباشرة في مصر · تواصل معنا: <a class="link-gold" href="mailto:enwanakegypt@gmail.com">enwanakegypt@gmail.com</a></div>
+    <div dir="ltr">ENWANAK is a digital real estate platform by <b style="color:#d8b46a">ZAD Digital and Business Solutions</b> · V8.13</div>
   </div>
 </footer>
 
@@ -399,18 +409,39 @@ th{color:#8f9ba7}
 
 <!-- Owner Modal -->
 <div class="modal" id="ownerModal"><div class="modal-box">
-  <div class="modal-head"><h3>أضف عقارك مجانًا</h3><button class="close" onclick="closeModal('ownerModal')">✕</button></div>
+  <div class="modal-head"><h3>أضف عقارك مجانا</h3><button class="close" onclick="closeModal('ownerModal')">✕</button></div>
   <div class="note">رقم المالك وبياناته لا تظهر للزائر، وتستخدم فقط لإدارة العقار والصفقة.</div>
   <div class="form-grid">
     <div class="field"><label>اسم المالك <b style="color:#f4d28a">*</b></label><input id="oName" required></div>
     <div class="field"><label>رقم الموبايل <b style="color:#f4d28a">*</b></label><input id="oPhone" required></div>
-    <div class="field"><label>بيع / إيجار</label><select id="oTx"><option value="sale">بيع</option><option value="rent">إيجار</option></select></div>
+    <div class="field"><label>بيع / إيجار</label><select id="oTx" onchange="toggleInstallmentFields()"><option value="sale">بيع</option><option value="rent">إيجار</option><option value="installment">تنازل / إعادة بيع بالتقسيط</option></select></div>
     <div class="field"><label>التصنيف</label><select id="oKind"><option value="residential">سكني</option><option value="admin">إداري</option><option value="commercial">تجاري</option></select></div>
     <div class="field"><label>المحافظة</label><select id="oGov"></select></div>
     <div class="field"><label>المنطقة / المدينة</label><select id="oArea" data-allow-custom="1"></select></div>
     <div class="field"><label>نوع العقار</label><select id="oType"><option>شقة</option><option>فيلا</option><option>دوبلكس</option><option>بنتهاوس</option><option>مقر إداري</option></select></div>
     <div class="field"><label>المساحة م² <b style="color:#f4d28a">*</b></label><input id="oSize" type="number" required></div>
-    <div class="field"><label>السعر <b style="color:#f4d28a">*</b></label><input id="oPrice" type="number" required></div>
+    <div class="field"><label id="oPriceLabel">السعر <b style="color:#f4d28a">*</b></label><input id="oPrice" type="number" required oninput="calcInstallment()"></div>
+  </div>
+  <div id="installmentFields" class="installment-box" style="display:none">
+    <div class="installment-head">بيانات التنازل عن وحدة بالتقسيط</div>
+    <div class="note" style="margin:0 0 10px">السعر فوق = المبلغ المطلوب من المشتري الآن مقابل التنازل. من حقك تطلب أكتر من المدفوع حسب سعر السوق وشروط المطور.</div>
+    <div class="form-grid">
+      <div class="field"><label>المطور العقاري / المشروع <b style="color:#f4d28a">*</b></label><input id="iDeveloper" placeholder="مثال: مدينتي — طلعت مصطفى"></div>
+      <div class="field"><label>السعر الأصلي بالعقد <b style="color:#f4d28a">*</b></label><input id="iContract" type="number" oninput="calcInstallment()"></div>
+      <div class="field"><label>المدفوع حتى الآن <b style="color:#f4d28a">*</b></label><input id="iPaid" type="number" oninput="calcInstallment()"></div>
+      <div class="field"><label>المتبقي على الوحدة</label><input id="iRemaining" type="number" placeholder="يحسب تلقائيا"></div>
+      <div class="field"><label>قيمة القسط</label><input id="iAmount" type="number"></div>
+      <div class="field"><label>نظام الأقساط</label><select id="iFreq"><option value="monthly">شهري</option><option value="quarterly">ربع سنوي</option><option value="semiannual">نصف سنوي</option><option value="annual">سنوي</option></select></div>
+      <div class="field"><label>عدد الأقساط المتبقية</label><input id="iCount" type="number"></div>
+      <div class="field"><label>ميعاد القسط الجاي</label><input id="iNext" type="date"></div>
+      <div class="field"><label>ميعاد آخر قسط</label><input id="iLast" type="date"></div>
+      <div class="field"><label>رسوم التنازل للمطور</label><input id="iFees" type="number" placeholder="لو موجودة"></div>
+      <div class="field"><label>مين يدفع رسوم التنازل</label><select id="iFeesBy"><option value="">غير محدد</option><option value="buyer">المشتري</option><option value="seller">البائع</option><option value="split">مناصفة</option></select></div>
+      <div class="field"><label>حالة الوحدة</label><select id="iDelivery"><option value="under_construction">تحت الإنشاء</option><option value="ready">استلام فوري</option><option value="delivered">مستلمة</option></select></div>
+      <div class="field"><label>موعد الاستلام المتوقع</label><input id="iDeliveryDate" placeholder="مثال: 2028"></div>
+    </div>
+    <div class="field"><label>شروط التنازل</label><textarea id="iTerms" rows="2" placeholder="مثال: موافقة المطور، نقل العقد، سداد القسط الجاي قبل التنازل…"></textarea></div>
+    <div id="iSummary" class="installment-summary"></div>
   </div>
   <div class="field"><label>عنوان الإعلان <b style="color:#f4d28a">*</b></label><input id="oTitle" required placeholder="مثال: عقار إداري فاخر بمدخل مستقل"></div>
   <div class="field"><label>الوصف</label><textarea id="oDesc" rows="3"></textarea></div>
@@ -432,14 +463,14 @@ th{color:#8f9ba7}
 <!-- Request Modal -->
 <div class="modal" id="requestModal"><div class="modal-box" style="width:min(920px,100%)">
   <div class="modal-head"><h3>اطلب عقارك بالمواصفات</h3><button class="close" onclick="closeModal('requestModal')">✕</button></div>
-  <div class="note">اكتب مواصفاتك وميزانيتك، وعنوانك يطابق طلبك فورًا مع العقارات المتاحة والجديدة.</div>
+  <div class="note">اكتب مواصفاتك وميزانيتك، وعنوانك يطابق طلبك فورا مع العقارات المتاحة والجديدة.</div>
 
   <div class="form-grid">
     <div class="field"><label>الاسم</label><input id="rName"></div>
     <div class="field"><label>رقم الموبايل</label><input id="rPhone"></div>
 
     <div class="field"><label>نوع الطلب</label>
-      <select id="rTx"><option value="sale">شراء</option><option value="rent">إيجار</option></select>
+      <select id="rTx"><option value="sale">شراء</option><option value="installment">شراء وحدة بالتقسيط (تنازل)</option><option value="rent">إيجار</option></select>
     </div>
     <div class="field"><label>التصنيف</label>
       <select id="rKind"><option value="residential">سكني</option><option value="admin">إداري</option><option value="commercial">تجاري</option></select>
@@ -495,7 +526,7 @@ th{color:#8f9ba7}
 <!-- Interest Lead -->
 <div class="modal" id="interestModal"><div class="modal-box" style="max-width:620px">
   <div class="modal-head"><h3>مهتم بالعقار</h3><button class="close" onclick="closeModal('interestModal')">✕</button></div>
-  <div class="note">هذا الطلب يسجل Lead مرتبطًا بعقار محدد، وليس "طلب عقار" عامًا.</div>
+  <div class="note">هذا الطلب يسجل Lead مرتبطا بعقار محدد، وليس "طلب عقار" عاما.</div>
   <input type="hidden" id="interestPropertyId">
   <div class="form-grid">
     <div class="field"><label>الاسم</label><input id="iName"></div>
@@ -518,8 +549,8 @@ th{color:#8f9ba7}
 <!-- Admin gate -->
 <div class="modal" id="adminGateModal"><div class="modal-box" style="max-width:400px">
   <div class="modal-head"><h3>دخول لوحة الإدارة</h3><button class="close" onclick="closeModal('adminGateModal')">✕</button></div>
-  <div class="note">الدخول محمي بواسطة Firebase Authentication. الحساب الإداري: <b>elzieni2007@gmail.com</b></div>
-  <div class="field"><label>البريد الإداري</label><input value="elzieni2007@gmail.com" readonly></div>
+  <div class="note">الدخول محمي بواسطة Firebase Authentication.</div>
+  <div class="field"><label>البريد الإداري</label><input id="adminEmail" type="email" dir="ltr" autocomplete="username" placeholder="name@gmail.com"></div>
   <div class="field"><label>كلمة مرور Firebase</label><input id="adminPass" type="password" placeholder="••••••" onkeydown="if(event.key==='Enter')checkAdminPass()"></div>
   <div id="adminGateError" style="display:none;color:#e9b2b2;font-size:12px;margin-bottom:10px">تعذر تسجيل الدخول. راجع كلمة المرور أو الاتصال بالإنترنت.</div>
   <button class="btn gold" style="width:100%" onclick="checkAdminPass()">دخول</button>
@@ -528,7 +559,7 @@ th{color:#8f9ba7}
 <div class="modal" id="adminModal"><div class="modal-box admin-panel">
   <div class="modal-head"><h3>لوحة الإدارة — Firebase Live</h3><button class="close" onclick="closeModal('adminModal')">✕</button></div>
   <div class="security-note">
-    <b>حالة الـBackend:</b> <span id="firebaseStatus">جارٍ الاتصال بـ Firebase…</span><br>
+    <b>حالة الـBackend:</b> <span id="firebaseStatus">جار الاتصال بـ Firebase…</span><br>
     البيانات التشغيلية محفوظة في Cloud Firestore، ودخول الإدارة عبر Firebase Authentication، وصور العقارات مرتبطة بـ Firebase Storage.
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
       <button class="btn ghost" onclick="enableAdminPush()">تفعيل تنبيهات الإدارة</button>
@@ -571,7 +602,7 @@ th{color:#8f9ba7}
     <div class="field"><label>الحالة</label><select id="dealStatus" onchange="updateDealPriceRequirement()"><option value="reserved">محجوز</option><option value="contract">تحت التعاقد</option><option value="sold">تم البيع</option><option value="rented">تم التأجير</option></select></div>
     <div class="field"><label>السعر النهائي / قيمة الإيجار الشهرية</label><input id="dealPrice" type="number" min="0" placeholder="إجباري عند البيع أو التأجير"></div>
     <div class="field"><label>تاريخ إتمام العملية</label><input id="dealCloseDate" type="date"></div>
-    <div class="field"><label>العمولة المتوقعة</label><input id="dealCommissionPreview" readonly placeholder="تحسب تلقائيًا"></div>
+    <div class="field"><label>العمولة المتوقعة</label><input id="dealCommissionPreview" readonly placeholder="تحسب تلقائيا"></div>
   </div>
   <div class="note" style="margin-bottom:12px">عند تأكيد البيع أو التأجير يجب إدخال السعر النهائي وتاريخ الإتمام. عمولة البيع = 1% من السعر النهائي، وعمولة الإيجار = قيمة إيجار شهر واحد.</div>
   <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px">
@@ -588,7 +619,7 @@ th{color:#8f9ba7}
     <div class="field"><label>إضافة منطقة / مدينة</label><input id="adminNewArea" placeholder="مثال: الشيخ زايد"></div>
   </div>
   <button class="btn ghost" style="width:100%;margin-bottom:12px" onclick="addAdminArea()">إضافة المنطقة وتحديث جميع القوائم</button>
-  <div id="locationAdminStatus" class="note">أي محافظة أو منطقة تضيفها هنا ستظهر فورًا في البحث ونموذج تسجيل العقار ونموذج طلب العقار.</div>
+  <div id="locationAdminStatus" class="note">أي محافظة أو منطقة تضيفها هنا ستظهر فورا في البحث ونموذج تسجيل العقار ونموذج طلب العقار.</div>
 
   <h4 style="margin:24px 0 10px;color:var(--gold2)">التقارير والتصدير</h4>
   <div class="form-grid">
@@ -596,7 +627,7 @@ th{color:#8f9ba7}
     <div class="field"><label>إلى تاريخ</label><input id="reportTo" type="date" onchange="renderReports()"></div>
     <div class="field"><label>المحافظة</label><select id="reportGov" onchange="renderReports()"></select></div>
     <div class="field"><label>نوع الوحدة</label><select id="reportKind" onchange="renderReports()"><option value="">الكل</option><option value="residential">سكني</option><option value="admin">إداري</option><option value="commercial">تجاري</option></select></div>
-    <div class="field"><label>نوع العملية</label><select id="reportTx" onchange="renderReports()"><option value="">الكل</option><option value="sale">بيع</option><option value="rent">إيجار</option></select></div>
+    <div class="field"><label>نوع العملية</label><select id="reportTx" onchange="renderReports()"><option value="">الكل</option><option value="sale">بيع</option><option value="installment">تنازل بالتقسيط</option><option value="rent">إيجار</option></select></div>
     <div class="field"><label>حالة الصفقة</label><select id="reportStatus" onchange="renderReports()"><option value="">الكل</option><option value="sold">تم البيع</option><option value="rented">تم التأجير</option><option value="reserved">محجوز</option><option value="contract">تحت التعاقد</option></select></div>
   </div>
   <div class="stats" style="margin-top:12px">
@@ -619,7 +650,7 @@ th{color:#8f9ba7}
   <h4 style="margin:24px 0 10px;color:var(--gold2)">سجل العقار Property Timeline</h4>
   <div class="form-grid">
     <div class="field"><label>اختر العقار</label><select id="timelineProperty" onchange="renderTimeline()"></select></div>
-    <div class="field"><label>أضف حدثًا يدويًا</label><input id="timelineNote" placeholder="مثال: تمت المعاينة"></div>
+    <div class="field"><label>أضف حدثا يدويا</label><input id="timelineNote" placeholder="مثال: تمت المعاينة"></div>
   </div>
   <button class="btn ghost" style="width:100%;margin-bottom:12px" onclick="addTimelineEvent()">إضافة الحدث للسجل</button>
   <div id="timelineBox"></div>
@@ -708,7 +739,8 @@ const firebaseConfig = {
   measurementId: "G-C88CVCGDPK"
 };
 const VAPID_KEY = "BEqVtc3EU_kI6PfmQ3Y2r0G1k1Cq1Lmmkc1BT0i0aaaDZb8DhmDuPE44rDs0Fir4oIWW5OA3eqSZVD0834PIYvs";
-const ADMIN_EMAIL = "elzieni2007@gmail.com";
+const ADMIN_EMAILS = ["elzieni2007@gmail.com","enwanakegypt@gmail.com"];
+const ADMIN_EMAIL = ADMIN_EMAILS[0];
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
@@ -723,7 +755,7 @@ function clean(obj){
   return out;
 }
 
-window.ENW_FIREBASE = { configured:true, app, db, auth, storage, ADMIN_EMAIL, VAPID_KEY };
+window.ENW_FIREBASE = { configured:true, app, db, auth, storage, ADMIN_EMAIL, ADMIN_EMAILS, VAPID_KEY };
 window.ENW_DB = {
   async loadPublicProperties(){
     return rows(await getDocs(query(collection(db,"properties"),where("published","==",true))));
@@ -756,12 +788,25 @@ window.ENW_DB = {
     payload.imageUrls=imageUrls;
     payload.img=imageUrls[0]||"";
     payload.gallery=imageUrls;
-    await setDoc(doc(db,"propertySubmissions",payload.submissionId),clean(payload));
+    try{
+      await setDoc(doc(db,"propertySubmissions",payload.submissionId),clean(payload));
+    }catch(e){
+      // If security rules reject the new installment field, keep the data inside the description instead.
+      if(!payload.installment || !String(e?.code||"").includes("permission")) throw e;
+      const txt=installmentText(payload.installment);
+      delete payload.installment;
+      payload.description=(payload.description?payload.description+"\n\n":"")+"【تنازل بالتقسيط】\n"+txt;
+      await setDoc(doc(db,"propertySubmissions",payload.submissionId),clean(payload));
+    }
     return {submissionId:payload.submissionId,imageUrls,imageError};
   },
   async submitRequest(payload){ await setDoc(doc(db,"requests",payload.id),clean(payload)); },
   async submitLead(payload){ await setDoc(doc(db,"leads",payload.id),clean(payload)); },
-  async login(password){ return signInWithEmailAndPassword(auth,ADMIN_EMAIL,password); },
+  async login(email,password){
+    const e=String(email||"").trim().toLowerCase();
+    if(!ADMIN_EMAILS.includes(e)) throw new Error("هذا البريد غير مسجل كحساب إدارة");
+    return signInWithEmailAndPassword(auth,e,password);
+  },
   async logout(){ return signOut(auth); },
   currentUser(){ return auth.currentUser; },
   async loadAdminData(){
@@ -785,7 +830,8 @@ window.ENW_DB = {
       area:sub.area||"",type:sub.type||"",size:Number(sub.size||0),price:Number(sub.price||0),
       tx:sub.tx||"sale",kind:sub.kind||"residential",status:"available",published:true,
       img:(sub.imageUrls&&sub.imageUrls[0])||sub.img||"",gallery:Array.isArray(sub.imageUrls)?sub.imageUrls:(Array.isArray(sub.gallery)?sub.gallery:[]),createdAt:sub.createdAt||new Date().toISOString(),approvedAt:new Date().toISOString(),
-      acquisition:sub.acquisition||{}
+      acquisition:sub.acquisition||{},
+      installment:sub.installment||undefined
     });
     await setDoc(doc(db,"properties",propertyCode),publicProperty);
     await setDoc(doc(db,"owners",propertyCode),clean({
@@ -833,7 +879,7 @@ window.ENW_DB = {
     await setDoc(doc(db,"locations","catalog"),{governorates,areas,updatedAt:new Date().toISOString()});
   },
   async registerAdminPush(){
-    if(!auth.currentUser) throw new Error("سجّل دخول الإدارة أولًا");
+    if(!auth.currentUser) throw new Error("سجّل دخول الإدارة أولا");
     if(!(await isSupported())) throw new Error("المتصفح الحالي لا يدعم Web Push عبر Firebase");
     const permission=await Notification.requestPermission();
     if(permission!=="granted") throw new Error("لم يتم السماح بالإشعارات");
@@ -887,7 +933,7 @@ function handleCampaignDirectLink(){
 document.addEventListener("DOMContentLoaded",()=>{
   handleCampaignDirectLink();
   const el=document.getElementById("firebaseStatus");
-  if(el && window.ENW_FIREBASE?.configured) el.textContent="Firebase متصل — جارٍ تحميل بيانات Firestore…";
+  if(el && window.ENW_FIREBASE?.configured) el.textContent="Firebase متصل — جار تحميل بيانات Firestore…";
 });
 window.addEventListener("enw-foreground-message",e=>{
   const p=e.detail||{};
@@ -923,7 +969,7 @@ const DEFAULT_AREAS_BY_GOVERNORATE = {
   "بني سويف": [],
   "المنيا": [],
   "أسيوط": [],
-  "سوهاج": [],
+  "سوهاج": ["سوهاج (المدينة)", "سوهاج الجديدة", "حي الكوثر", "أخميم", "أخميم الجديدة", "طهطا", "طما", "جرجا", "البلينا", "المراغة", "المنشأة", "ساقلتة", "دار السلام", "جهينة", "العسيرات"],
   "قنا": [],
   "الأقصر": [],
   "أسوان": [],
@@ -969,15 +1015,18 @@ async function openAdminGate(){
     return;
   }
   document.getElementById("adminPass").value="";
+  try{ document.getElementById("adminEmail").value=localStorage.getItem("enwAdminEmail")||""; }catch(e){}
   document.getElementById("adminGateError").style.display="none";
   openModal("adminGateModal");
 }
 async function checkAdminPass(){
   const pass=document.getElementById("adminPass").value;
+  const email=document.getElementById("adminEmail").value;
   const err=document.getElementById("adminGateError");
   err.style.display="none";
   try{
-    await window.ENW_DB.login(pass);
+    await window.ENW_DB.login(email,pass);
+    try{ localStorage.setItem("enwAdminEmail",String(email).trim().toLowerCase()); }catch(e){}
     adminSignedIn=true;
     closeModal("adminGateModal");
     await loadAdminDashboard();
@@ -993,7 +1042,7 @@ async function adminLogout(){
 }
 async function enableAdminPush(){
   const ps=document.getElementById("pushStatus");
-  if(ps) ps.textContent="جارٍ تفعيل الإشعارات…";
+  if(ps) ps.textContent="جار تفعيل الإشعارات…";
   try{
     const token=await window.ENW_DB.registerAdminPush();
     if(ps) ps.textContent=`تم تفعيل FCM لهذا الجهاز بنجاح. Token: ${token.slice(0,18)}…`;
@@ -1179,9 +1228,9 @@ function currentValue(segmentId){return document.querySelector(`#${segmentId} bu
 function setTypeOptions(selectId, kind, includeAny=true){
   const el=document.getElementById(selectId); if(!el) return;
   const current=el.value;
-  const residential=["شقة","فيلا","دوبلكس","بنتهاوس"];
-  const admin=["مقر إداري"];
-  const commercial=["محل تجاري"];
+  const residential=["شقة","فيلا","دوبلكس","بنتهاوس","منزل مستقل","عمارة","أرض مباني","وحدة سكنية أخرى"];
+  const admin=["مقر إداري","مكتب إداري","وحدة إدارية"];
+  const commercial=["محل تجاري","وحدة تجارية","معرض","مخزن","أرض زراعية"];
   const items=kind==="residential"?residential:kind==="admin"?admin:kind==="commercial"?commercial:[...residential,...admin,...commercial];
   el.innerHTML=(includeAny?`<option value="">${selectId==="typeSelect"?"كل الأنواع":"أي نوع"}</option>`:"")+items.map(x=>`<option>${x}</option>`).join("");
   if(items.includes(current)) el.value=current;
@@ -1193,9 +1242,140 @@ function syncKindTypeFields(){
   const ek=document.getElementById("editKind")?.value||"residential"; setTypeOptions("editType",ek,false);
 }
 function toggleSegment(el,id){document.querySelectorAll(`#${id} button`).forEach(b=>b.classList.remove("active"));el.classList.add("active");if(id==="kindSegment") setTypeOptions("typeSelect",el.dataset.value,true);renderProperties()}
-function quickArea(a){
+
+// ---- V8.13 installment resale (تنازل بالتقسيط) ----
+const INST_FREQ={monthly:"شهري",quarterly:"ربع سنوي",semiannual:"نصف سنوي",annual:"سنوي"};
+const INST_DELIVERY={under_construction:"تحت الإنشاء",ready:"استلام فوري",delivered:"مستلمة"};
+const INST_FEES_BY={buyer:"المشتري",seller:"البائع",split:"مناصفة"};
+function toggleInstallmentFields(){
+  const on=document.getElementById("oTx")?.value==="installment";
+  const box=document.getElementById("installmentFields"); if(box) box.style.display=on?"block":"none";
+  const lbl=document.getElementById("oPriceLabel");
+  if(lbl) lbl.innerHTML=(on?"المطلوب من المشتري للتنازل":"السعر")+' <b style="color:#f4d28a">*</b>';
+  if(on) calcInstallment();
+}
+function numVal(id){ return Number(document.getElementById(id)?.value||0); }
+function calcInstallment(){
+  const contract=numVal("iContract"), paid=numVal("iPaid"), ask=numVal("oPrice");
+  const rem=document.getElementById("iRemaining");
+  if(rem && contract && paid && !rem.dataset.manual) rem.value=Math.max(contract-paid,0);
+  const out=document.getElementById("iSummary"); if(!out) return;
+  if(!paid || !ask){ out.innerHTML=""; return; }
+  const diff=ask-paid;
+  out.innerHTML=`المدفوع ${money(paid)} ج.م · المطلوب ${money(ask)} ج.م · ${diff>=0?`الأوفر ${money(diff)} ج.م`:`أقل من المدفوع بـ ${money(-diff)} ج.م`}`;
+}
+document.addEventListener("input",e=>{ if(e.target?.id==="iRemaining") e.target.dataset.manual=e.target.value?"1":""; });
+function readInstallmentForm(){
+  const v=id=>document.getElementById(id)?.value?.trim()||"";
+  const contract=numVal("iContract"), paid=numVal("iPaid");
+  const strip=o=>Object.fromEntries(Object.entries(o).filter(([,x])=>x!==undefined&&x!==""));
+  return strip({
+    developer:v("iDeveloper"), contractPrice:contract, paid,
+    remaining:numVal("iRemaining")||Math.max(contract-paid,0),
+    installmentAmount:numVal("iAmount")||undefined, frequency:v("iFreq"),
+    installmentsLeft:numVal("iCount")||undefined, nextDue:v("iNext")||undefined, lastDue:v("iLast")||undefined,
+    transferFees:numVal("iFees")||undefined, feesPaidBy:v("iFeesBy")||undefined,
+    delivery:v("iDelivery"), deliveryDate:v("iDeliveryDate")||undefined, terms:v("iTerms")||undefined
+  });
+}
+function installmentRows(i,ask){
+  const m=x=>x?`${money(Number(x))} ج.م`:"";
+  const premium=(ask&&i.paid)?Number(ask)-Number(i.paid):null;
+  return [
+    ["المطور / المشروع",i.developer],["السعر الأصلي بالعقد",m(i.contractPrice)],["المدفوع حتى الآن",m(i.paid)],
+    ["المتبقي",m(i.remaining)],["المطلوب للتنازل",m(ask)],
+    ["الأوفر",premium!==null&&premium>0?m(premium):(premium===0?"بدون أوفر":"")],
+    ["قيمة القسط",i.installmentAmount?`${m(i.installmentAmount)} · ${INST_FREQ[i.frequency]||""}`:""],
+    ["الأقساط المتبقية",i.installmentsLeft||""],["القسط الجاي",i.nextDue||""],["آخر قسط",i.lastDue||""],
+    ["رسوم التنازل",i.transferFees?`${m(i.transferFees)}${i.feesPaidBy?` · يدفعها ${INST_FEES_BY[i.feesPaidBy]}`:""}`:""],
+    ["حالة الوحدة",INST_DELIVERY[i.delivery]||""],["موعد الاستلام",i.deliveryDate||""]
+  ].filter(r=>r[1]!==""&&r[1]!==undefined&&r[1]!==null);
+}
+function installmentDetailHtml(i,ask){
+  return `<div class="installment-box" style="display:block;margin-top:12px">
+    <div class="installment-head">تفاصيل التنازل بالتقسيط</div>
+    <div class="detail-grid">${installmentRows(i,ask).map(([k,v])=>`<div class="detail-item"><span>${k}</span><b>${esc(String(v))}</b></div>`).join("")}</div>
+    ${i.terms?`<div class="detail-item" style="margin-top:10px"><span>شروط التنازل</span><b style="white-space:pre-wrap;font-weight:600">${esc(i.terms)}</b></div>`:""}
+  </div>`;
+}
+function installmentText(i){
+  return installmentRows(i).map(([k,v])=>`${k}: ${v}`).join("\n")+(i.terms?`\nشروط التنازل: ${i.terms}`:"");
+}
+
+// ---- Multi-city launch (V8.12): Cairo + Sohag ----
+const CITY_CONFIG = {
+  "": {
+    title:'<span>عقارات مختارة</span><br>من المالك مباشرة في مصر',
+    text:'سكني وإداري وتجاري للبيع أو الإيجار في القاهرة وسوهاج، مع حالة محدثة لكل وحدة ومتابعة من أول الاهتمام حتى التعاقد — بدون عمولة على المالك.',
+    chips:[["العاصمة الإدارية الجديدة","القاهرة","العاصمة الإدارية"],["التجمع الخامس","القاهرة"],["مدينة نصر","القاهرة"],["سوهاج (المدينة)","سوهاج","مدينة سوهاج"],["سوهاج الجديدة","سوهاج"],["أخميم","سوهاج"],["طهطا","سوهاج"],["جرجا","سوهاج"]]
+  },
+  "القاهرة": {
+    title:'<span>عقارات فاخرة</span><br>من المالك مباشرة في القاهرة',
+    text:'سكني وإداري للبيع أو الإيجار في القاهرة والعاصمة الإدارية، مع حالة محدثة لكل وحدة ومتابعة من أول الاهتمام حتى التعاقد — بدون عمولة على المالك.',
+    chips:[["العاصمة الإدارية الجديدة","القاهرة","العاصمة الإدارية"],["التجمع الخامس","القاهرة"],["المعادي","القاهرة"],["مدينة نصر","القاهرة"],["مصر الجديدة","القاهرة"],["الزمالك","القاهرة"],["المقطم","القاهرة"],["الشروق","القاهرة"],["مدينتي","القاهرة"]]
+  },
+  "سوهاج": {
+    title:'<span>عقارك في سوهاج</span><br>من المالك مباشرة',
+    text:'شقق وبيوت وأراضي ومحلات للبيع أو الإيجار في مدينة سوهاج والمراكز، مع حالة محدثة لكل وحدة ومتابعة حتى التعاقد — بدون عمولة على المالك.',
+    chips:[["سوهاج (المدينة)","سوهاج","مدينة سوهاج"],["سوهاج الجديدة","سوهاج"],["حي الكوثر","سوهاج","الكوثر"],["أخميم","سوهاج"],["طهطا","سوهاج"],["طما","سوهاج"],["جرجا","سوهاج"],["البلينا","سوهاج"],["المراغة","سوهاج"]]
+  }
+};
+const CITY_SLUGS = {cairo:"القاهرة", sohag:"سوهاج"};
+let activeCity = "";
+function mergeDefaultLocations(){
+  DEFAULT_EGYPT_GOVERNORATES.forEach(g=>{ if(!egyptGovernorates.includes(g)) egyptGovernorates.push(g); });
+  Object.entries(DEFAULT_AREAS_BY_GOVERNORATE).forEach(([g,list])=>{
+    if(g==="القاهرة") return; // Cairo has its own curated normalisation
+    const cur=Array.isArray(areasByGovernorate[g])?areasByGovernorate[g]:[];
+    areasByGovernorate[g]=[...cur, ...list.filter(a=>!cur.includes(a))];
+  });
+}
+function syncSearchableInput(selectId){
+  const sel=document.getElementById(selectId); if(!sel) return;
+  const wrap=sel.closest(".searchable-select"); if(!wrap) return;
+  const inp=wrap.querySelector("input"); if(!inp) return;
+  const o=[...sel.options].find(x=>x.value===sel.value);
+  inp.value=o&&o.value?o.textContent:"";
+}
+function renderAreaChips(){
+  const box=document.getElementById("areaChips"); if(!box) return;
+  const cfg=CITY_CONFIG[activeCity]||CITY_CONFIG[""];
+  box.innerHTML=cfg.chips.map(([area,gov,label])=>`<button class="chip" onclick="quickArea('${esc(area)}','${esc(gov)}')">${esc(label||area)}</button>`).join("");
+}
+function setActiveCity(gov, opts={}){
+  activeCity = CITY_CONFIG[gov] ? gov : "";
+  try{ localStorage.setItem("enwCity",activeCity); }catch(e){}
+  document.querySelectorAll(".city-select").forEach(s=>{ s.value=activeCity; });
+  const cfg=CITY_CONFIG[activeCity];
+  const t=document.getElementById("heroTitle"); if(t) t.innerHTML=cfg.title;
+  const p=document.getElementById("heroText"); if(p) p.textContent=cfg.text;
+  renderAreaChips();
+  const gs=document.getElementById("govSelect");
+  if(gs){ gs.value=activeCity; refillAreaSelect("govSelect","areaSelect"); syncSearchableInput("govSelect"); }
+  ["oGov","rGov"].forEach(id=>{
+    const el=document.getElementById(id);
+    const modalOpen=el && el.closest(".modal.open, .modal.show, .modal[style*='flex']");
+    if(el && activeCity && !modalOpen){
+      el.value=activeCity; syncSearchableInput(id);
+      if(id==="oGov") refillAreaSelect("oGov","oArea"); else { refillAreaSelect("rGov","rArea"); refillAreaSelect("rGov","rArea2"); }
+    }
+  });
+  if(!opts.silent) renderProperties();
+}
+function initialCity(){
+  try{
+    const q=new URLSearchParams(location.search);
+    const c=(q.get("city")||"").toLowerCase(), g=q.get("gov")||"";
+    if(CITY_SLUGS[c]) return CITY_SLUGS[c];
+    if(CITY_CONFIG[g]) return g;
+  }catch(e){}
+  try{ const s=localStorage.getItem("enwCity"); if(s && CITY_CONFIG[s]) return s; }catch(e){}
+  return "";
+}
+function quickArea(a,g){
   const gov=document.getElementById("govSelect");
-  if(gov) gov.value="القاهرة";
+  if(gov) gov.value=g||activeCity||"القاهرة";
+  syncSearchableInput("govSelect");
   refillAreaSelect("govSelect","areaSelect");
   document.getElementById("areaSelect").value=a;
   const areaWrap=document.getElementById("areaSelect").closest(".searchable-select");
@@ -1243,35 +1423,35 @@ function waOwnerSubmission(submissionId){
   const s=pendingSubmissions.find(x=>(x._docId||x.submissionId)===submissionId);
   if(!s)return;
   const code=s.submissionId||submissionId;
-  openWhatsAppMessage(s.ownerPhone,`أهلًا ${s.ownerName||""}، تم استلام تسجيل عقارك على منصة عنوانك | ENWANAK برقم ${code}. العقار حاليًا تحت المراجعة وسيتم التواصل معك بعد اعتماده.`);
+  openWhatsAppMessage(s.ownerPhone,`أهلا ${s.ownerName||""}، تم استلام تسجيل عقارك على منصة عنوانك | ENWANAK برقم ${code}. العقار حاليا تحت المراجعة وسيتم التواصل معك بعد اعتماده.`);
 }
 function waOwnerApproved(propertyId){
   const p=properties.find(x=>x.id===propertyId);
   if(!p)return;
   const phone=p.ownerPhone||p.phone||"";
-  openWhatsAppMessage(phone,`أهلًا ${p.ownerName||""}، تم اعتماد ونشر عقارك على منصة عنوانك | ENWANAK برقم ${p.id}. يمكنك متابعة أي اهتمام أو تطورات من خلال فريق عنوانك.`);
+  openWhatsAppMessage(phone,`أهلا ${p.ownerName||""}، تم اعتماد ونشر عقارك على منصة عنوانك | ENWANAK برقم ${p.id}. يمكنك متابعة أي اهتمام أو تطورات من خلال فريق عنوانك.`);
 }
 function waClientRequest(requestId){
   const r=requests.find(x=>x.id===requestId);
   if(!r)return;
-  openWhatsAppMessage(r.phone,`أهلًا ${r.name||""}، تم استلام طلبك على منصة عنوانك | ENWANAK. سنقوم بمطابقة طلبك مع العقارات المناسبة والتواصل معك عند وجود تطابق.`);
+  openWhatsAppMessage(r.phone,`أهلا ${r.name||""}، تم استلام طلبك على منصة عنوانك | ENWANAK. سنقوم بمطابقة طلبك مع العقارات المناسبة والتواصل معك عند وجود تطابق.`);
 }
 function waClientLead(leadId){
   const l=leads.find(x=>x.id===leadId);
   if(!l)return;
   const p=properties.find(x=>x.id===l.propertyId)||{};
-  openWhatsAppMessage(l.phone,`أهلًا ${l.name||""}، تم تسجيل اهتمامك بالعقار ${l.propertyId}${p.title?` — ${p.title}`:""} على منصة عنوانك | ENWANAK. سيتواصل معك فريق عنوانك لاستكمال التفاصيل.`);
+  openWhatsAppMessage(l.phone,`أهلا ${l.name||""}، تم تسجيل اهتمامك بالعقار ${l.propertyId}${p.title?` — ${p.title}`:""} على منصة عنوانك | ENWANAK. سيتواصل معك فريق عنوانك لاستكمال التفاصيل.`);
 }
 function waOwnerInterest(leadId){
   const l=leads.find(x=>x.id===leadId); if(!l)return;
   const p=properties.find(x=>x.id===l.propertyId)||{};
   const phone=p.ownerPhone||p.phone||"";
-  openWhatsAppMessage(phone,`أهلًا ${p.ownerName||""}، يوجد عميل أبدى اهتمامًا بعقارك ${l.propertyId}${p.title?` — ${p.title}`:""} على منصة عنوانك | ENWANAK. سيتواصل معك فريق عنوانك لاستكمال التفاصيل.`);
+  openWhatsAppMessage(phone,`أهلا ${p.ownerName||""}، يوجد عميل أبدى اهتماما بعقارك ${l.propertyId}${p.title?` — ${p.title}`:""} على منصة عنوانك | ENWANAK. سيتواصل معك فريق عنوانك لاستكمال التفاصيل.`);
 }
 function waClientMatch(notificationIndex){
   const n=notifications[notificationIndex]; if(!n)return;
   const url=propertyShareUrl(n.propertyId);
-  openWhatsAppMessage(n.clientPhone,`أهلًا ${n.clientName||""}، وجدنا عقارًا مطابقًا لطلبك على عنوانك | ENWANAK بنسبة ${n.score||""}%.\n${n.propertyTitle||n.propertyId}\n${url}`);
+  openWhatsAppMessage(n.clientPhone,`أهلا ${n.clientName||""}، وجدنا عقارا مطابقا لطلبك على عنوانك | ENWANAK بنسبة ${n.score||""}%.\n${n.propertyTitle||n.propertyId}\n${url}`);
 }
 
 function shareOnWhatsApp(propertyId){
@@ -1283,7 +1463,7 @@ function setDynamicOgForProperty(property){
   if(!property)return;
   const firstImage=(Array.isArray(property.gallery)&&property.gallery[0]) || property.img || "";
   const description=[
-    property.tx==="rent"?"للإيجار":"للبيع",
+    property.tx==="rent"?"للإيجار":property.installment?"تنازل بالتقسيط":"للبيع",
     property.type||"",
     property.area||"",
     property.price?`${money(Number(property.price))} ج.م`:""
@@ -1343,19 +1523,20 @@ function renderProperties(){
   const type=document.getElementById("typeSelect").value;
   const min=Number(document.getElementById("minArea").value||0);
   const max=Number(document.getElementById("maxPrice").value||0);
-  const list=properties.filter(p=>p.status!=="review" && (!tx||p.tx===tx) && (!kind||p.kind===kind) && (!governorate||(p.governorate||"القاهرة")===governorate) && areaMatches(p.area,area) && (!type||p.type===type) && (!min||p.size>=min) && (!max||p.price<=max));
+  const list=properties.filter(p=>p.status!=="review" && (!tx||(tx==="installment"?!!p.installment:p.tx===tx)) && (!kind||p.kind===kind) && (!governorate||(p.governorate||"القاهرة")===governorate) && areaMatches(p.area,area) && (!type||p.type===type) && (!min||p.size>=min) && (!max||p.price<=max));
   document.getElementById("resultCount").textContent=`${list.length} عقار مطابق`;
   document.getElementById("cards").innerHTML=list.slice(0,6).map(p=>`
   <article class="card">
     <div class="photo" style="background-image:url('${p.img||ENW_PLACEHOLDER}')">
       <span class="tag ${statusClass(p.status)}">${statusLabel(p.status)}</span>
+      ${p.installment?'<span class="tag inst-tag">تقسيط · تنازل</span>':''}
       <button class="heart">♡</button>
     </div>
     <div class="card-body">
       <div class="card-title">${esc(p.title)}</div>
       <div class="location">⌖ ${esc(p.area)}${p.governorate?` — ${p.governorate}`:" — القاهرة"}</div>
       <div class="meta"><span>▣ ${p.size} م²</span><span>${esc(p.type)}</span><span>${esc(p.id)}</span></div>
-      <div class="price">${money(p.price)} ج.م <small>${p.tx==="rent"?"/ شهريًا":""}</small></div>
+      <div class="price">${money(p.price)} ج.م <small>${p.tx==="rent"?"/ شهريا":""}</small></div>
       <div class="owner">✓ مالك مباشر — البيانات محفوظة لدى عنوانك</div>
       <div style="display:flex;gap:8px;margin-top:12px">
         <button class="btn gold" style="flex:1;padding:10px" onclick="openProperty('${esc(p.id)}')">عرض التفاصيل</button>
@@ -1363,7 +1544,7 @@ function renderProperties(){
         <button class="btn ghost" style="flex:1;padding:10px;${p.status!=="available"?'opacity:.55':''}" ${p.status!=="available"?'disabled':''} onclick="openInterest('${esc(p.id)}')">${p.status==="available"?"مهتم بالعقار":statusLabel(p.status)}</button>
       </div>
     </div>
-  </article>`).join("") || `<div style="grid-column:1/-1;border:1px solid var(--line);border-radius:20px;padding:40px;text-align:center;color:#9ba7b3">لا توجد وحدات مطابقة حاليًا. استخدم "اطلب عقار" وسنسجل طلبك.</div>`;
+  </article>`).join("") || `<div style="grid-column:1/-1;border:1px solid var(--line);border-radius:20px;padding:40px;text-align:center;color:#9ba7b3">${governorate&&governorate!=="القاهرة"?`لسه بنبدأ في ${esc(governorate)} — لو عندك عقار <a class="link-gold" href="javascript:void(0)" onclick="openModal('ownerModal')">اعرضه مجانا</a>، ولو بتدور على عقار استخدم "اطلب عقار" وهنبلغك أول ما يتوفر.`:'لا توجد وحدات مطابقة حاليا. استخدم "اطلب عقار" وسنسجل طلبك.'}</div>`;
 }
 let ownerImagesBuffer = [];
 function handleOwnerImages(e){
@@ -1455,6 +1636,14 @@ async function addProperty(){
   const title=document.getElementById("oTitle").value.trim(), owner=document.getElementById("oName").value.trim(), phone=document.getElementById("oPhone").value.trim();
   const size=Number(document.getElementById("oSize").value), price=Number(document.getElementById("oPrice").value);
   const missing=[];
+  if(!document.getElementById("oGov").value) missing.push("المحافظة");
+  const isInst=document.getElementById("oTx").value==="installment";
+  const inst=isInst?readInstallmentForm():null;
+  if(isInst){
+    if(!inst.developer) missing.push("المطور العقاري");
+    if(!inst.contractPrice) missing.push("السعر الأصلي بالعقد");
+    if(!inst.paid) missing.push("المدفوع حتى الآن");
+  }
   if(!owner) missing.push("اسم المالك");
   if(!phone) missing.push("رقم الموبايل");
   if(!size) missing.push("المساحة");
@@ -1466,20 +1655,22 @@ async function addProperty(){
   }
   ownerSubmissionInProgress=true;
   const btn=document.getElementById("ownerSubmitBtn");
-  if(btn){btn.disabled=true;btn.textContent="جارٍ حفظ العقار…";}
-  setInlineStatus("ownerSubmitStatus",ownerImagesBuffer.length?"جارٍ رفع الصور ثم حفظ بيانات العقار…":"جارٍ حفظ بيانات العقار…");
+  if(btn){btn.disabled=true;btn.textContent="جار حفظ العقار…";}
+  setInlineStatus("ownerSubmitStatus",ownerImagesBuffer.length?"جار رفع الصور ثم حفظ بيانات العقار…":"جار حفظ بيانات العقار…");
   const submissionId="ENW-S-"+Date.now()+"-"+Math.random().toString(36).slice(2,6);
   const payload={
     submissionId,title,description:document.getElementById("oDesc").value.trim(),
-    ownerName:owner,ownerPhone:phone,governorate:document.getElementById("oGov").value||"القاهرة",
+    ownerName:owner,ownerPhone:phone,governorate:document.getElementById("oGov").value,
     area:document.getElementById("oArea").value,type:document.getElementById("oType").value,
-    size,price,tx:document.getElementById("oTx").value,kind:document.getElementById("oKind").value,
+    size,price,tx:isInst?"sale":document.getElementById("oTx").value,kind:document.getElementById("oKind").value,
+    installment:inst||undefined,
     status:"review",createdAt:new Date().toISOString(),acquisition:{...ENW_ACQ}
   };
   try{
     const result=await window.ENW_DB.submitProperty(payload, ownerImagesBuffer.map(x=>x.file));
     const imageFailed=!!result?.imageError;
-    ["oName","oPhone","oSize","oPrice","oTitle","oDesc"].forEach(f=>document.getElementById(f).value="");
+    ["oName","oPhone","oSize","oPrice","oTitle","oDesc","iDeveloper","iContract","iPaid","iRemaining","iAmount","iCount","iNext","iLast","iFees","iDeliveryDate","iTerms"].forEach(f=>{const el=document.getElementById(f); if(el) el.value="";});
+    document.getElementById("oTx").value="sale"; toggleInstallmentFields();
     if(!imageFailed) clearOwnerImages();
     setInlineStatus("ownerSubmitStatus",imageFailed
       ? `تم حفظ العقار برقم ${submissionId}، لكن تعذر رفع الصور. كود الخطأ: ${result.imageError?.code||result.imageError?.message||"Storage error"}. لن يمنع ذلك مراجعة العقار.`
@@ -1521,7 +1712,7 @@ async function saveRequest(){
   const name=document.getElementById("rName").value.trim(), phone=document.getElementById("rPhone").value.trim();
   if(!name||!phone){setInlineStatus("requestSubmitStatus","الاسم ورقم الموبايل مطلوبان.","error");return}
   const request={
-    id:"R-"+Date.now(),name,phone,tx:document.getElementById("rTx").value,kind:document.getElementById("rKind").value,
+    id:"R-"+Date.now(),name,phone,tx:document.getElementById("rTx").value==="installment"?"sale":document.getElementById("rTx").value,wantsInstallment:document.getElementById("rTx").value==="installment"||undefined,kind:document.getElementById("rKind").value,
     governorate:document.getElementById("rGov").value,area:document.getElementById("rArea").value,area2:document.getElementById("rArea2").value,
     type:document.getElementById("rType").value,finish:document.getElementById("rFinish").value,
     budgetMin:Number(document.getElementById("rBudgetMin").value||0),budget:Number(document.getElementById("rBudget").value||0),
@@ -1531,8 +1722,8 @@ async function saveRequest(){
     date:new Date().toLocaleDateString("ar-EG"),createdAt:new Date().toISOString()
   };
   requestSubmissionInProgress=true;
-  const btn=document.getElementById("requestSubmitBtn"); if(btn){btn.disabled=true;btn.textContent="جارٍ تسجيل الطلب…";}
-  setInlineStatus("requestSubmitStatus","جارٍ حفظ طلبك في قاعدة العملاء…");
+  const btn=document.getElementById("requestSubmitBtn"); if(btn){btn.disabled=true;btn.textContent="جار تسجيل الطلب…";}
+  setInlineStatus("requestSubmitStatus","جار حفظ طلبك في قاعدة العملاء…");
   try{
     await window.ENW_DB.submitRequest(request);
     requests.push(request);
@@ -1547,6 +1738,7 @@ async function saveRequest(){
 function scoreMatch(p,req){
   if(p.status!=="available") return null;
   if(req.tx && p.tx!==req.tx) return null;
+  if(req.wantsInstallment && !p.installment) return null;
   if(req.kind && p.kind!==req.kind) return null;
   const pGov=p.governorate||"القاهرة";
   if(req.governorate && pGov!==req.governorate) return null;
@@ -1605,7 +1797,7 @@ function showMatches(req){
         <div style="margin:10px 0;color:#9fc7b7;font-size:11px">${x.reasons.map(esc).join(" · ")}</div>
         <button class="btn gold" style="width:100%;margin-top:6px" onclick="closeModal('matchModal');openProperty('${x.property.id}')">عرض العقار</button>
       </div>`).join("")}</div>` :
-    `<div class="note">لا يوجد تطابق مناسب حاليًا. تم حفظ طلبك، وسيظهر ضمن قاعدة الطلبات لمطابقته مع أي عقار جديد.</div>`;
+    `<div class="note">لا يوجد تطابق مناسب حاليا. تم حفظ طلبك، وسيظهر ضمن قاعدة الطلبات لمطابقته مع أي عقار جديد.</div>`;
 
   openModal("matchModal");
 }
@@ -1758,15 +1950,16 @@ function openProperty(id){
         <span class="eyebrow">${statusLabel(p.status)}</span>
         <h2>${esc(p.title)}</h2>
         <div class="location">⌖ ${esc(p.area)} — ${esc(p.governorate||"القاهرة")}</div>
-        <div class="detail-price">${money(p.price)} ج.م ${p.tx==="rent"?'<small style="font-size:13px;color:#9aa6b3">/ شهريًا</small>':""}</div>
+        <div class="detail-price">${p.installment?'<small style="font-size:13px;color:#9aa6b3">المطلوب للتنازل </small>':''}${money(p.price)} ج.م ${p.tx==="rent"?'<small style="font-size:13px;color:#9aa6b3">/ شهريا</small>':""}</div>
         <div class="commission-box">
           <b>عمولة عنوانك عند إتمام الصفقة فقط:</b><br>
-          ${p.tx==="sale" ? "المشتري: 1% من قيمة البيع" : "المستأجر: قيمة إيجار شهر واحد"} · <b>المالك: 0% عمولة</b>
+          ${p.tx==="sale" ? (p.installment?"المشتري: 1% من قيمة البيع (المبلغ المطلوب للتنازل)":"المشتري: 1% من قيمة البيع") : "المستأجر: قيمة إيجار شهر واحد"} · <b>المالك: 0% عمولة</b>
         </div>
+        ${p.installment?installmentDetailHtml(p.installment,p.price):""}
         <div class="detail-grid">
           <div class="detail-item"><span>المساحة</span><b>${p.size} م²</b></div>
           <div class="detail-item"><span>النوع</span><b>${esc(p.type)}</b></div>
-          <div class="detail-item"><span>الغرض</span><b>${p.tx==="sale"?"بيع":"إيجار"}</b></div>
+          <div class="detail-item"><span>الغرض</span><b>${p.installment?"تنازل بالتقسيط":p.tx==="sale"?"بيع":"إيجار"}</b></div>
           <div class="detail-item"><span>التصنيف</span><b>${p.kind==="admin"?"إداري":p.kind==="commercial"?"تجاري":"سكني"}</b></div>
         </div>
         ${p.description?`<div class="detail-item" style="margin-top:12px"><span>تفاصيل الإعلان</span><b style="white-space:pre-wrap;line-height:1.9;font-weight:600">${esc(p.description)}</b></div>`:`<div class="note" style="margin-top:12px">لا توجد تفاصيل إضافية مسجلة لهذا الإعلان.</div>`}
@@ -1838,7 +2031,7 @@ async function approveProperty(id){
     properties.unshift(p); timelines[propertyCode]=items;
     const notified=notifyMatchingRequests(p);
     await loadAdminDashboard(); renderProperties();
-    alert(`تم اعتماد ${propertyCode} وأصبح متاحًا للزوار.${notified?` تم إنشاء ${notified} تنبيه مطابقة.`:""}`);
+    alert(`تم اعتماد ${propertyCode} وأصبح متاحا للزوار.${notified?` تم إنشاء ${notified} تنبيه مطابقة.`:""}`);
   }catch(e){ console.error(e); alert("تعذر اعتماد العقار في Firebase."); }
 }
 
@@ -1922,7 +2115,7 @@ async function savePropertyEdits(){
   const price=Number(document.getElementById("editPrice").value);
   if(!title||!size||!price){ alert("العنوان والمساحة والسعر بيانات مطلوبة."); return; }
   const st=document.getElementById("editPropertyStatus");
-  st.style.display="block"; st.textContent="جارٍ حفظ التعديلات…";
+  st.style.display="block"; st.textContent="جار حفظ التعديلات…";
   try{
     const files=[...document.getElementById("editNewImages").files].slice(0,6);
     let added=[];
@@ -1963,7 +2156,7 @@ async function deletePublishedProperty(id){
   const hasDeals=deals.some(d=>d.propertyId===id);
   const warning=hasDeals
     ? `هذا العقار مرتبط بسجل عمليات سابق. سيتم حذف الإعلان وبيانات المالك وسجل الـTimeline من الموقع، مع الاحتفاظ بسجل العمليات المالية. هل تريد المتابعة؟`
-    : `سيتم حذف إعلان ${id} من الموقع نهائيًا. هل تريد المتابعة؟`;
+    : `سيتم حذف إعلان ${id} من الموقع نهائيا. هل تريد المتابعة؟`;
   if(!confirm(warning))return;
   try{
     await window.ENW_DB.deleteProperty(id);
@@ -2005,6 +2198,9 @@ function openSubmissionReview(id){
         <div class="detail-item"><span>تاريخ التسجيل</span><b>${displayDate(sub.createdAt)||esc(sub.createdAt||"—")}</b></div>
         <div class="detail-item"><span>اسم المالك</span><b>${esc(sub.ownerName||"—")}</b></div>
         <div class="detail-item"><span>هاتف المالك</span><b dir="ltr">${esc(sub.ownerPhone||"—")}</b></div>
+      </div>
+      ${sub.installment?installmentDetailHtml(sub.installment,sub.price):""}
+      <div class="detail-grid">
       </div>
       <div class="detail-item" style="margin-top:10px"><span>وصف العقار</span><b style="white-space:normal;line-height:1.8">${esc(sub.description||sub.details||sub.notes||"لا توجد تفاصيل إضافية مسجلة.")}</b></div>
       <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px">
@@ -2116,6 +2312,7 @@ async function loadAdminDashboard(){
   if(data.locations?.governorates?.length){
     egyptGovernorates=data.locations.governorates; areasByGovernorate=data.locations.areas||areasByGovernorate;
     egyptGovernorates.forEach(g=>{if(!Array.isArray(areasByGovernorate[g])) areasByGovernorate[g]=[];});
+    mergeDefaultLocations();
     normalizeCairoAreas();
     refreshAllLocationSelects();
   }
@@ -2124,16 +2321,18 @@ async function loadAdminDashboard(){
 }
 
 async function bootstrapENWANAK(){
-  fillAreas(); bindKindTypeFilters(); renderProperties();
+  fillAreas(); bindKindTypeFilters(); setActiveCity(initialCity(),{silent:true}); renderProperties();
   try{
     const [props,catalog]=await Promise.all([window.ENW_DB.loadPublicProperties(),window.ENW_DB.loadLocations()]);
     properties=(props||[]).map(p=>({...p,governorate:p.governorate||"القاهرة"}));
     if(catalog?.governorates?.length){
       egyptGovernorates=catalog.governorates; areasByGovernorate=catalog.areas||areasByGovernorate;
       egyptGovernorates.forEach(g=>{if(!Array.isArray(areasByGovernorate[g])) areasByGovernorate[g]=[];});
+      mergeDefaultLocations();
       normalizeCairoAreas();
       refreshAllLocationSelects();
     }
+    if(activeCity){ const gs=document.getElementById("govSelect"); if(gs && !gs.value){ gs.value=activeCity; refillAreaSelect("govSelect","areaSelect"); syncSearchableInput("govSelect"); } }
     renderProperties();
     handlePropertyDirectLink();
     const st=document.getElementById("firebaseStatus"); if(st) st.textContent="Firebase متصل — البيانات تُقرأ مباشرة من Firestore.";
@@ -2165,7 +2364,8 @@ function filteredDeals(){
     if(to && iso && iso>to) return false;
     if(gov && dg!==gov) return false;
     if(kind && dk!==kind) return false;
-    if(tx && dtx!==tx) return false;
+    if(tx==="installment"){ if(!p.installment) return false; }
+    else if(tx && dtx!==tx) return false;
     if(status && d.status!==status) return false;
     return true;
   });
@@ -2285,7 +2485,7 @@ function refreshAdmin(){
         <button class="btn ghost" style="padding:6px 10px;font-size:11px;border-color:rgba(216,92,92,.45);color:#f2b0b0" onclick="openRejectSubmission('${p._docId||p.submissionId}')">رفض</button>
       </div>
     </td></tr>
-  `).join(""):`<tr><td colspan="4">لا توجد عقارات تحت المراجعة حاليًا.</td></tr>`;
+  `).join(""):`<tr><td colspan="4">لا توجد عقارات تحت المراجعة حاليا.</td></tr>`;
 
   document.getElementById("notifTable").innerHTML=notifications.length?notifications.slice(0,10).map((n,i)=>`
     <tr><td>${esc(n.clientName)}</td><td>${esc(n.clientPhone)}</td><td>${esc(n.propertyId)} — ${esc(n.propertyTitle)}</td><td>${n.score}%</td><td>${n.date}</td><td><div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn ghost" style="padding:6px 10px;font-size:11px" onclick="waClientMatch(${i})">واتساب</button><button class="btn gold" style="padding:6px 10px;font-size:11px" onclick="prepareDeal('${esc(n.propertyId)}','${esc(n.clientRequestId||"")}')">ربط</button></div></td></tr>
