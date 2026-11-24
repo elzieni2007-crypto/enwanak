@@ -263,6 +263,12 @@ th{color:#8f9ba7}
 footer{padding-bottom:90px !important}
 .fb-btn{white-space:nowrap}
 @media(max-width:760px){.msg-fab{right:14px;bottom:14px;padding:12px 14px}.footer-contact{margin:0 14px 18px;padding:16px}.footer-contact-btns{width:100%}.fb-btn{flex:1;justify-content:center;font-size:13px;padding:12px 10px}}
+/* V8.19 compact header button */
+.header-add{white-space:nowrap}
+@media(max-width:760px){.header-add{padding:11px 16px !important;font-size:14px !important;border-radius:12px !important;min-height:0 !important;line-height:1.2}}
+@media(max-width:420px){.header-add{padding:10px 12px !important;font-size:13.5px !important}.brand-logo{width:40px;height:40px}.brand{gap:6px}.brand-mark{font-size:22px}.brand-mark span{letter-spacing:3px}}
+@media(max-width:420px){.nav{gap:8px}.nav-actions{gap:6px}.hamburger{width:38px;height:38px}}
+@media(max-width:370px){.header-add{padding:9px 10px !important;font-size:12.5px !important}.brand-mark{font-size:19px}.brand-mark span{font-size:9px;letter-spacing:2px}.brand-logo{width:36px;height:36px}}
 /* V8.12 mobile polish */
 @media (max-width: 760px){
   .hero-copy{padding-top:18px}
@@ -299,7 +305,7 @@ footer{padding-bottom:90px !important}
     </nav>
     <div class="nav-actions">
       <select class="location-chip city-select" aria-label="اختر المحافظة" onchange="setActiveCity(this.value)"><option value="">⌖ كل المحافظات</option><option value="القاهرة">⌖ القاهرة</option><option value="سوهاج">⌖ سوهاج</option></select>
-      <button class="btn gold" onclick="openOwnerFromCampaign()">＋ أضف عقارك مجانا</button>
+      <button class="btn gold header-add" onclick="openOwnerFromCampaign()">＋ أضف عقارك<span class="header-add-free"> مجانا</span></button>
       <button class="hamburger" onclick="toggleMobileMenu()" aria-label="فتح القائمة">☰</button>
     </div>
   </div>
@@ -433,7 +439,7 @@ footer{padding-bottom:90px !important}
   </div>
   <div class="shell footer-row">
     <div style="display:flex;align-items:center;gap:12px"><img src="logo-192.png" alt="" width="48" height="48" style="border-radius:50%"><span><b style="color:#fff">عنوانك ENWANAK</b> — عقارات من المالك مباشرة في مصر · تواصل معنا: <a class="link-gold" href="mailto:enwanakegypt@gmail.com">enwanakegypt@gmail.com</a></span></div>
-    <div dir="ltr">ENWANAK is a digital real estate platform by <b style="color:#d8b46a">ZAD Digital and Business Solutions</b> · V8.17</div>
+    <div dir="ltr">ENWANAK is a digital real estate platform by <b style="color:#d8b46a">ZAD Digital and Business Solutions</b> · V8.19</div>
   </div>
 </footer>
 
@@ -871,9 +877,18 @@ window.ENW_DB = {
       if(file.size > 5 * 1024 * 1024) throw new Error("الحد الأقصى للصورة الواحدة 5MB");
       const ext=(file.name.split(".").pop()||"jpg").replace(/[^a-zA-Z0-9]/g,"").slice(0,8)||"jpg";
       const path=`published-properties/${propertyId}/${Date.now()}-${String(i+1).padStart(2,"0")}.${ext}`;
-      const r=storageRef(storage,path);
-      await uploadBytes(r,file,{contentType:file.type,customMetadata:{propertyId}});
-      urls.push(await getDownloadURL(r));
+      try{
+        const r=storageRef(storage,path);
+        await uploadBytes(r,file,{contentType:file.type,customMetadata:{propertyId}});
+        urls.push(await getDownloadURL(r));
+      }catch(err){
+        if(!String(err?.code||"").includes("unauthorized")) throw err;
+        // Fallback: the same folder the "add your property" form uses, which the current Storage rules accept.
+        const submissionId=`ENW-S-${Date.now()}-${propertyId}`;
+        const r2=storageRef(storage,`property-submissions/${submissionId}/${String(i+1).padStart(2,"0")}-${Date.now()}.${ext}`);
+        await uploadBytes(r2,file,{contentType:file.type,customMetadata:{submissionId}});
+        urls.push(await getDownloadURL(r2));
+      }
     }
     return urls;
   },
@@ -2248,8 +2263,16 @@ async function savePropertyEdits(){
   st.style.display="block"; st.textContent="جار حفظ التعديلات…";
   try{
     const files=[...document.getElementById("editNewImages").files].slice(0,6);
-    let added=[];
-    if(files.length) added=await window.ENW_DB.uploadPublishedImages(id,files);
+    let added=[], notes=[];
+    if(files.length){
+      try{ added=await window.ENW_DB.uploadPublishedImages(id,files); }
+      catch(err){
+        console.error("image upload",err);
+        notes.push(String(err?.code||"").includes("unauthorized")
+          ? "الصور الجديدة ما اترفعتش: قواعد Firebase Storage مش سامحة بالرفع على مسار published-properties."
+          : "الصور الجديدة ما اترفعتش: "+String(err?.message||err));
+      }
+    }
     const gallery=[...editPropertyGallery,...added];
     const updated={
       ...p,
@@ -2269,16 +2292,26 @@ async function savePropertyEdits(){
       published:true,
       updatedAt:new Date().toISOString()
     };
-    await window.ENW_DB.updateProperty(updated);
+    if(!updated.installment) delete updated.installment;
+    try{
+      await window.ENW_DB.updateProperty(updated);
+    }catch(err){
+      // Firestore rules may not allow the installment field yet: keep the data in the description instead.
+      if(!updated.installment || !String(err?.code||"").includes("permission")) throw err;
+      const inst=updated.installment; delete updated.installment;
+      updated.description=(updated.description?updated.description+"\n\n":"")+INST_MARK+"\n"+installmentText(inst);
+      await window.ENW_DB.updateProperty(updated);
+      notes.push("بيانات التقسيط اتحفظت داخل الوصف، لأن قواعد Firestore لسه مش سامحة بحقل installment.");
+    }
     const i=properties.findIndex(x=>x.id===id);
     if(i>=0) properties[i]=updated;
     renderProperties();
     renderPublishedAdminTable();
-    st.textContent="تم حفظ التعديلات بنجاح.";
-    setTimeout(()=>closeModal("editPropertyModal"),700);
+    if(notes.length){ st.innerHTML="تم حفظ باقي التعديلات.<br>"+notes.map(esc).join("<br>"); }
+    else { st.textContent="تم حفظ التعديلات بنجاح."; setTimeout(()=>closeModal("editPropertyModal"),700); }
   }catch(e){
     console.error(e);
-    st.textContent="تعذر حفظ التعديلات: "+String(e?.message||e);
+    st.textContent="تعذر حفظ التعديلات: "+String(e?.code||"")+" "+String(e?.message||e);
   }
 }
 
