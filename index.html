@@ -248,6 +248,7 @@ th{color:#8f9ba7}
 /* V8.13 installment */
 .installment-box{border:1px solid rgba(231,184,92,.35);background:rgba(231,184,92,.05);border-radius:16px;padding:14px;margin:6px 0 14px}
 .installment-head{color:var(--gold2);font-weight:800;margin-bottom:8px}
+.installment-sub{color:#cfd6de;font-weight:800;font-size:13px;margin:6px 0 8px;border-top:1px dashed rgba(231,184,92,.25);padding-top:10px}
 .installment-summary{color:#f4d28a;font-size:13px;font-weight:700}
 .tag.inst-tag{right:auto;left:56px;background:#d8b46a;color:#0b1726}
 /* V8.15 Facebook contact */
@@ -432,7 +433,7 @@ footer{padding-bottom:90px !important}
   </div>
   <div class="shell footer-row">
     <div style="display:flex;align-items:center;gap:12px"><img src="logo-192.png" alt="" width="48" height="48" style="border-radius:50%"><span><b style="color:#fff">عنوانك ENWANAK</b> — عقارات من المالك مباشرة في مصر · تواصل معنا: <a class="link-gold" href="mailto:enwanakegypt@gmail.com">enwanakegypt@gmail.com</a></span></div>
-    <div dir="ltr">ENWANAK is a digital real estate platform by <b style="color:#d8b46a">ZAD Digital and Business Solutions</b> · V8.15</div>
+    <div dir="ltr">ENWANAK is a digital real estate platform by <b style="color:#d8b46a">ZAD Digital and Business Solutions</b> · V8.17</div>
   </div>
 </footer>
 
@@ -453,27 +454,7 @@ footer{padding-bottom:90px !important}
     <div class="field"><label>المساحة م² <b style="color:#f4d28a">*</b></label><input id="oSize" type="number" required></div>
     <div class="field"><label id="oPriceLabel">السعر <b style="color:#f4d28a">*</b></label><input id="oPrice" type="number" required oninput="calcInstallment()"></div>
   </div>
-  <div id="installmentFields" class="installment-box" style="display:none">
-    <div class="installment-head">بيانات التنازل عن وحدة بالتقسيط</div>
-    <div class="note" style="margin:0 0 10px">السعر فوق = المبلغ المطلوب من المشتري الآن مقابل التنازل. من حقك تطلب أكتر من المدفوع حسب سعر السوق وشروط المطور.</div>
-    <div class="form-grid">
-      <div class="field"><label>المطور العقاري / المشروع <b style="color:#f4d28a">*</b></label><input id="iDeveloper" placeholder="مثال: مدينتي — طلعت مصطفى"></div>
-      <div class="field"><label>السعر الأصلي بالعقد <b style="color:#f4d28a">*</b></label><input id="iContract" type="number" oninput="calcInstallment()"></div>
-      <div class="field"><label>المدفوع حتى الآن <b style="color:#f4d28a">*</b></label><input id="iPaid" type="number" oninput="calcInstallment()"></div>
-      <div class="field"><label>المتبقي على الوحدة</label><input id="iRemaining" type="number" placeholder="يحسب تلقائيا"></div>
-      <div class="field"><label>قيمة القسط</label><input id="iAmount" type="number"></div>
-      <div class="field"><label>نظام الأقساط</label><select id="iFreq"><option value="monthly">شهري</option><option value="quarterly">ربع سنوي</option><option value="semiannual">نصف سنوي</option><option value="annual">سنوي</option></select></div>
-      <div class="field"><label>عدد الأقساط المتبقية</label><input id="iCount" type="number"></div>
-      <div class="field"><label>ميعاد القسط الجاي</label><input id="iNext" type="date"></div>
-      <div class="field"><label>ميعاد آخر قسط</label><input id="iLast" type="date"></div>
-      <div class="field"><label>رسوم التنازل للمطور</label><input id="iFees" type="number" placeholder="لو موجودة"></div>
-      <div class="field"><label>مين يدفع رسوم التنازل</label><select id="iFeesBy"><option value="">غير محدد</option><option value="buyer">المشتري</option><option value="seller">البائع</option><option value="split">مناصفة</option></select></div>
-      <div class="field"><label>حالة الوحدة</label><select id="iDelivery"><option value="under_construction">تحت الإنشاء</option><option value="ready">استلام فوري</option><option value="delivered">مستلمة</option></select></div>
-      <div class="field"><label>موعد الاستلام المتوقع</label><input id="iDeliveryDate" placeholder="مثال: 2028"></div>
-    </div>
-    <div class="field"><label>شروط التنازل</label><textarea id="iTerms" rows="2" placeholder="مثال: موافقة المطور، نقل العقد، سداد القسط الجاي قبل التنازل…"></textarea></div>
-    <div id="iSummary" class="installment-summary"></div>
-  </div>
+  <div id="installmentFields" class="installment-box" style="display:none" data-prefix="i"></div>
   <div class="field"><label>عنوان الإعلان <b style="color:#f4d28a">*</b></label><input id="oTitle" required placeholder="مثال: عقار إداري فاخر بمدخل مستقل"></div>
   <div class="field"><label>الوصف</label><textarea id="oDesc" rows="3"></textarea></div>
   <div class="field">
@@ -581,7 +562,7 @@ footer{padding-bottom:90px !important}
 <div class="modal" id="adminGateModal"><div class="modal-box" style="max-width:400px">
   <div class="modal-head"><h3>دخول لوحة الإدارة</h3><button class="close" onclick="closeModal('adminGateModal')">✕</button></div>
   <div class="note">الدخول محمي بواسطة Firebase Authentication.</div>
-  <div class="field"><label>البريد الإداري</label><input id="adminEmail" type="email" dir="ltr" autocomplete="username" placeholder="name@gmail.com"></div>
+  <div class="field"><label>البريد الإداري</label><input id="adminEmail" type="email" dir="ltr" autocomplete="username" value="elzieni2007@gmail.com" readonly></div>
   <div class="field"><label>كلمة مرور Firebase</label><input id="adminPass" type="password" placeholder="••••••" onkeydown="if(event.key==='Enter')checkAdminPass()"></div>
   <div id="adminGateError" style="display:none;color:#e9b2b2;font-size:12px;margin-bottom:10px">تعذر تسجيل الدخول. راجع كلمة المرور أو الاتصال بالإنترنت.</div>
   <button class="btn gold" style="width:100%" onclick="checkAdminPass()">دخول</button>
@@ -695,13 +676,13 @@ footer{padding-bottom:90px !important}
   <div id="editPropertyCurrentImages" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px"></div>
   <div class="form-grid">
     <div class="field"><label>عنوان الإعلان</label><input id="editTitle"></div>
-    <div class="field"><label>بيع / إيجار</label><select id="editTx"><option value="sale">بيع</option><option value="rent">إيجار</option></select></div>
+    <div class="field"><label>بيع / إيجار</label><select id="editTx" onchange="toggleEditInstallment()"><option value="sale">بيع</option><option value="rent">إيجار</option><option value="installment">تنازل / إعادة بيع بالتقسيط</option></select></div>
     <div class="field"><label>التصنيف</label><select id="editKind" onchange="setTypeOptions('editType',this.value,false)"><option value="residential">سكني</option><option value="admin">إداري</option><option value="commercial">تجاري</option></select></div>
     <div class="field"><label>المحافظة</label><select id="editGov" onchange="refillEditAreas()"></select></div>
     <div class="field"><label>المنطقة / المدينة</label><select id="editArea" data-allow-custom="1"></select></div>
     <div class="field"><label>نوع العقار</label><select id="editType"><option>شقة</option><option>فيلا</option><option>دوبلكس</option><option>بنتهاوس</option><option>مقر إداري</option><option>محل تجاري</option></select></div>
     <div class="field"><label>المساحة م²</label><input id="editSize" type="number" min="0"></div>
-    <div class="field"><label>السعر</label><input id="editPrice" type="number" min="0"></div>
+    <div class="field"><label id="editPriceLabel">السعر</label><input id="editPrice" type="number" min="0" oninput="calcInstallment('ei')"></div>
     <div class="field"><label>الحالة</label>
       <select id="editStatus">
         <option value="available">متاح</option>
@@ -712,6 +693,7 @@ footer{padding-bottom:90px !important}
       </select>
     </div>
   </div>
+  <div id="editInstallmentFields" class="installment-box" style="display:none" data-prefix="ei"></div>
   <div class="field"><label>تفاصيل / وصف الإعلان</label><textarea id="editDescription" rows="6" placeholder="اكتب كل تفاصيل العقار التي تريد أن تظهر للعميل"></textarea></div>
   <div class="field">
     <label>إضافة صور جديدة</label>
@@ -770,7 +752,7 @@ const firebaseConfig = {
   measurementId: "G-C88CVCGDPK"
 };
 const VAPID_KEY = "BEqVtc3EU_kI6PfmQ3Y2r0G1k1Cq1Lmmkc1BT0i0aaaDZb8DhmDuPE44rDs0Fir4oIWW5OA3eqSZVD0834PIYvs";
-const ADMIN_EMAILS = ["elzieni2007@gmail.com","enwanakegypt@gmail.com"];
+const ADMIN_EMAILS = ["elzieni2007@gmail.com"];
 const ADMIN_EMAIL = ADMIN_EMAILS[0];
 
 const app = initializeApp(firebaseConfig);
@@ -1039,6 +1021,7 @@ let leads = [];
 let timelines = {};
 let ownerPII = {};
 let notifications = [];
+const ADMIN_EMAIL_DEFAULT="elzieni2007@gmail.com";
 let adminSignedIn = false;
 
 // Firebase Authentication admin gate. No password is stored in the HTML.
@@ -1050,7 +1033,7 @@ async function openAdminGate(){
     return;
   }
   document.getElementById("adminPass").value="";
-  try{ document.getElementById("adminEmail").value=localStorage.getItem("enwAdminEmail")||""; }catch(e){}
+  document.getElementById("adminEmail").value=ADMIN_EMAIL_DEFAULT;
   document.getElementById("adminGateError").style.display="none";
   openModal("adminGateModal");
 }
@@ -1278,50 +1261,147 @@ function syncKindTypeFields(){
 }
 function toggleSegment(el,id){document.querySelectorAll(`#${id} button`).forEach(b=>b.classList.remove("active"));el.classList.add("active");if(id==="kindSegment") setTypeOptions("typeSelect",el.dataset.value,true);renderProperties()}
 
-// ---- V8.13 installment resale (تنازل بالتقسيط) ----
+// ---- V8.17 installment resale (تنازل بالتقسيط) — shared by owner form (prefix "i") and admin edit (prefix "ei") ----
 const INST_FREQ={monthly:"شهري",quarterly:"ربع سنوي",semiannual:"نصف سنوي",annual:"سنوي"};
 const INST_DELIVERY={under_construction:"تحت الإنشاء",ready:"استلام فوري",delivered:"مستلمة"};
 const INST_FEES_BY={buyer:"المشتري",seller:"البائع",split:"مناصفة"};
+const INST_MAINT={unpaid:"لم تسدد",paid:"مسددة",on_delivery:"تسدد عند الاستلام",partial:"مسدد جزء منها"};
+function installmentFormHtml(x){
+  const f=(id,label,attrs="")=>`<div class="field"><label>${label}</label><input id="${x}${id}" ${attrs}></div>`;
+  const num=(id,label,req)=>f(id,label+(req?' <b style="color:#f4d28a">*</b>':""),`type="number" min="0" oninput="calcInstallment('${x}')"`);
+  const sel=(id,label,opts)=>`<div class="field"><label>${label}</label><select id="${x}${id}">${opts}</select></div>`;
+  const o=m=>Object.entries(m).map(([k,v])=>`<option value="${k}">${v}</option>`).join("");
+  return `<div class="installment-head">بيانات التنازل عن وحدة بالتقسيط</div>
+    <div class="note" style="margin:0 0 10px">السعر = المبلغ المطلوب من المشتري الآن مقابل التنازل، ومن حق المالك يطلب أكتر من المدفوع حسب السوق وشروط المطور.</div>
+    <div class="form-grid">
+      ${f("Developer",'المطور العقاري / المشروع <b style="color:#f4d28a">*</b>','placeholder="مثال: كمبوند روتس"')}
+      ${num("Contract","السعر الأصلي بالعقد",true)}
+      ${num("Paid","المدفوع حتى الآن",true)}
+      ${num("Remaining","المتبقي على الوحدة")}
+    </div>
+    <div class="installment-sub">الأقساط — اكتب كل نوع موجود في العقد</div>
+    <div class="form-grid">
+      ${num("Monthly","قسط شهري")}
+      ${num("Quarterly","قسط ربع سنوي")}
+      ${num("Semiannual","قسط نصف سنوي")}
+      ${num("Annual","قسط سنوي")}
+      ${num("Years","مدة السداد المتبقية (بالسنين)")}
+      ${f("Next","ميعاد القسط الجاي",'type="date"')}
+      ${f("Last","ميعاد آخر قسط",'type="date"')}
+    </div>
+    <div class="installment-sub">الصيانة والتنازل والاستلام</div>
+    <div class="form-grid">
+      ${num("Maintenance","وديعة / رسوم الصيانة")}
+      ${sel("MaintStatus","حالة سداد الصيانة",'<option value="">غير محدد</option>'+o(INST_MAINT))}
+      ${num("Fees","رسوم التنازل للمطور")}
+      ${sel("FeesBy","مين يدفع رسوم التنازل",'<option value="">غير محدد</option>'+o(INST_FEES_BY))}
+      ${sel("Delivery","حالة الوحدة",o(INST_DELIVERY))}
+      ${f("DeliveryDate","موعد الاستلام المتوقع",'placeholder="مثال: 2028"')}
+    </div>
+    <div class="field"><label>شروط التنازل</label><textarea id="${x}Terms" rows="2" placeholder="مثال: موافقة المطور، نقل العقد، سداد القسط الجاي قبل التنازل…"></textarea></div>
+    <div id="${x}Summary" class="installment-summary"></div>`;
+}
+function mountInstallmentForms(){
+  document.querySelectorAll("[data-prefix]").forEach(box=>{ if(!box.dataset.mounted){ box.innerHTML=installmentFormHtml(box.dataset.prefix); box.dataset.mounted="1"; } });
+}
+document.addEventListener("DOMContentLoaded",mountInstallmentForms);
+if(document.readyState!=="loading") mountInstallmentForms();
 function toggleInstallmentFields(){
+  mountInstallmentForms();
   const on=document.getElementById("oTx")?.value==="installment";
   const box=document.getElementById("installmentFields"); if(box) box.style.display=on?"block":"none";
   const lbl=document.getElementById("oPriceLabel");
   if(lbl) lbl.innerHTML=(on?"المطلوب من المشتري للتنازل":"السعر")+' <b style="color:#f4d28a">*</b>';
-  if(on) calcInstallment();
+  if(on) calcInstallment("i");
+}
+function toggleEditInstallment(){
+  mountInstallmentForms();
+  const on=document.getElementById("editTx")?.value==="installment";
+  const box=document.getElementById("editInstallmentFields"); if(box) box.style.display=on?"block":"none";
+  const lbl=document.getElementById("editPriceLabel"); if(lbl) lbl.textContent=on?"المطلوب من المشتري للتنازل":"السعر";
+  if(on) calcInstallment("ei");
 }
 function numVal(id){ return Number(document.getElementById(id)?.value||0); }
-function calcInstallment(){
-  const contract=numVal("iContract"), paid=numVal("iPaid"), ask=numVal("oPrice");
-  const rem=document.getElementById("iRemaining");
+function calcInstallment(x="i"){
+  const contract=numVal(x+"Contract"), paid=numVal(x+"Paid"), ask=numVal(x==="ei"?"editPrice":"oPrice");
+  const rem=document.getElementById(x+"Remaining");
   if(rem && contract && paid && !rem.dataset.manual) rem.value=Math.max(contract-paid,0);
-  const out=document.getElementById("iSummary"); if(!out) return;
+  const out=document.getElementById(x+"Summary"); if(!out) return;
   if(!paid || !ask){ out.innerHTML=""; return; }
   const diff=ask-paid;
   out.innerHTML=`المدفوع ${money(paid)} ج.م · المطلوب ${money(ask)} ج.م · ${diff>=0?`الأوفر ${money(diff)} ج.م`:`أقل من المدفوع بـ ${money(-diff)} ج.م`}`;
 }
-document.addEventListener("input",e=>{ if(e.target?.id==="iRemaining") e.target.dataset.manual=e.target.value?"1":""; });
-function readInstallmentForm(){
-  const v=id=>document.getElementById(id)?.value?.trim()||"";
-  const contract=numVal("iContract"), paid=numVal("iPaid");
-  const strip=o=>Object.fromEntries(Object.entries(o).filter(([,x])=>x!==undefined&&x!==""));
+document.addEventListener("input",e=>{ if(/Remaining$/.test(e.target?.id||"")) e.target.dataset.manual=e.target.value?"1":""; });
+function readInstallmentForm(x="i"){
+  const v=id=>document.getElementById(x+id)?.value?.trim()||"";
+  const n=id=>numVal(x+id)||undefined;
+  const contract=numVal(x+"Contract"), paid=numVal(x+"Paid");
+  const strip=o=>Object.fromEntries(Object.entries(o).filter(([,y])=>y!==undefined&&y!==""&&y!==null));
   return strip({
-    developer:v("iDeveloper"), contractPrice:contract, paid,
-    remaining:numVal("iRemaining")||Math.max(contract-paid,0),
-    installmentAmount:numVal("iAmount")||undefined, frequency:v("iFreq"),
-    installmentsLeft:numVal("iCount")||undefined, nextDue:v("iNext")||undefined, lastDue:v("iLast")||undefined,
-    transferFees:numVal("iFees")||undefined, feesPaidBy:v("iFeesBy")||undefined,
-    delivery:v("iDelivery"), deliveryDate:v("iDeliveryDate")||undefined, terms:v("iTerms")||undefined
+    developer:v("Developer"), contractPrice:contract||undefined, paid:paid||undefined,
+    remaining:n("Remaining")||(contract&&paid?Math.max(contract-paid,0):undefined),
+    monthly:n("Monthly"), quarterly:n("Quarterly"), semiannual:n("Semiannual"), annual:n("Annual"),
+    yearsLeft:n("Years"), nextDue:v("Next"), lastDue:v("Last"),
+    maintenance:n("Maintenance"), maintenanceStatus:v("MaintStatus"),
+    transferFees:n("Fees"), feesPaidBy:v("FeesBy"),
+    delivery:v("Delivery"), deliveryDate:v("DeliveryDate"), terms:v("Terms")
   });
+}
+function fillInstallmentForm(x,i){
+  mountInstallmentForms(); i=i||{};
+  const set=(id,val)=>{ const el=document.getElementById(x+id); if(el) el.value=(val===undefined||val===null)?"":val; };
+  // older listings stored one amount + frequency
+  const legacy={}; if(i.installmentAmount && i.frequency) legacy[i.frequency]=i.installmentAmount;
+  set("Developer",i.developer); set("Contract",i.contractPrice); set("Paid",i.paid); set("Remaining",i.remaining);
+  set("Monthly",i.monthly??legacy.monthly); set("Quarterly",i.quarterly??legacy.quarterly);
+  set("Semiannual",i.semiannual??legacy.semiannual); set("Annual",i.annual??legacy.annual);
+  set("Years",i.yearsLeft); set("Next",i.nextDue); set("Last",i.lastDue);
+  set("Maintenance",i.maintenance); set("MaintStatus",i.maintenanceStatus||"");
+  set("Fees",i.transferFees); set("FeesBy",i.feesPaidBy||""); set("Delivery",i.delivery||"under_construction");
+  set("DeliveryDate",i.deliveryDate); set("Terms",i.terms);
+  const rem=document.getElementById(x+"Remaining"); if(rem) rem.dataset.manual=i.remaining?"1":"";
+}
+// Recover installment data that was saved inside the description (when security rules rejected the field)
+const INST_MARK="【تنازل بالتقسيط】";
+function parseInstallmentFromDescription(desc){
+  if(!desc || !desc.includes(INST_MARK)) return null;
+  const tail=desc.split(INST_MARK)[1]||"";
+  const latin=t=>String(t).replace(/[٠-٩]/g,d=>"٠١٢٣٤٥٦٧٨٩".indexOf(d));
+  const amount=t=>Number(latin(t).replace(/[^\d.]/g,""))||undefined;
+  const out={}, freqMap={"شهري":"monthly","ربع سنوي":"quarterly","نصف سنوي":"semiannual","سنوي":"annual"};
+  const rev=m=>Object.fromEntries(Object.entries(m).map(([k,v])=>[v,k]));
+  tail.split("\n").forEach(line=>{
+    const k=line.split(":")[0]?.trim(), val=line.slice(line.indexOf(":")+1).trim(); if(!val) return;
+    if(k==="المطور / المشروع") out.developer=val;
+    else if(k==="السعر الأصلي بالعقد") out.contractPrice=amount(val);
+    else if(k==="المدفوع حتى الآن") out.paid=amount(val);
+    else if(k==="المتبقي") out.remaining=amount(val);
+    else if(k==="قيمة القسط"){ const [a,fr]=val.split("·"); const key=freqMap[(fr||"").trim()]||"monthly"; out[key]=amount(a); }
+    else if(k.startsWith("قسط ")){ const key=freqMap[k.replace("قسط ","").trim()]; if(key) out[key]=amount(val); }
+    else if(k==="القسط الجاي") out.nextDue=latin(val);
+    else if(k==="آخر قسط") out.lastDue=latin(val);
+    else if(k==="رسوم التنازل"){ const [a,b]=val.split("·"); out.transferFees=amount(a); const who=(b||"").replace("يدفعها","").trim(); out.feesPaidBy=rev(INST_FEES_BY)[who]; }
+    else if(k==="حالة الوحدة") out.delivery=rev(INST_DELIVERY)[val];
+    else if(k==="موعد الاستلام") out.deliveryDate=latin(val);
+    else if(k==="شروط التنازل") out.terms=val;
+    else if(k==="الصيانة"){ const [a,b]=val.split("·"); out.maintenance=amount(a); out.maintenanceStatus=rev(INST_MAINT)[(b||"").trim()]; }
+  });
+  return Object.fromEntries(Object.entries(out).filter(([,v])=>v!==undefined&&v!==""));
 }
 function installmentRows(i,ask){
   const m=x=>x?`${money(Number(x))} ج.م`:"";
   const premium=(ask&&i.paid)?Number(ask)-Number(i.paid):null;
+  const legacy={}; if(i.installmentAmount && i.frequency) legacy[i.frequency]=i.installmentAmount;
+  const inst=k=>i[k]??legacy[k];
   return [
     ["المطور / المشروع",i.developer],["السعر الأصلي بالعقد",m(i.contractPrice)],["المدفوع حتى الآن",m(i.paid)],
     ["المتبقي",m(i.remaining)],["المطلوب للتنازل",m(ask)],
     ["الأوفر",premium!==null&&premium>0?m(premium):(premium===0?"بدون أوفر":"")],
-    ["قيمة القسط",i.installmentAmount?`${m(i.installmentAmount)} · ${INST_FREQ[i.frequency]||""}`:""],
-    ["الأقساط المتبقية",i.installmentsLeft||""],["القسط الجاي",i.nextDue||""],["آخر قسط",i.lastDue||""],
+    ["قسط شهري",m(inst("monthly"))],["قسط ربع سنوي",m(inst("quarterly"))],
+    ["قسط نصف سنوي",m(inst("semiannual"))],["قسط سنوي",m(inst("annual"))],
+    ["مدة السداد المتبقية",i.yearsLeft?`${i.yearsLeft} سنة`:""],
+    ["القسط الجاي",i.nextDue||""],["آخر قسط",i.lastDue||""],
+    ["الصيانة",i.maintenance?`${m(i.maintenance)}${i.maintenanceStatus?` · ${INST_MAINT[i.maintenanceStatus]}`:""}`:""],
     ["رسوم التنازل",i.transferFees?`${m(i.transferFees)}${i.feesPaidBy?` · يدفعها ${INST_FEES_BY[i.feesPaidBy]}`:""}`:""],
     ["حالة الوحدة",INST_DELIVERY[i.delivery]||""],["موعد الاستلام",i.deliveryDate||""]
   ].filter(r=>r[1]!==""&&r[1]!==undefined&&r[1]!==null);
@@ -1559,6 +1639,9 @@ function renderProperties(){
   const min=Number(document.getElementById("minArea").value||0);
   const max=Number(document.getElementById("maxPrice").value||0);
   const list=properties.filter(p=>p.status!=="review" && (!tx||(tx==="installment"?!!p.installment:p.tx===tx)) && (!kind||p.kind===kind) && (!governorate||(p.governorate||"القاهرة")===governorate) && areaMatches(p.area,area) && (!type||p.type===type) && (!min||p.size>=min) && (!max||p.price<=max));
+  // Newest published listing first
+  const ts=p=>Date.parse(p.approvedAt||p.publishedAt||p.createdAt||"")||0;
+  list.sort((a,b)=>ts(b)-ts(a));
   document.getElementById("resultCount").textContent=`${list.length} عقار مطابق`;
   document.getElementById("cards").innerHTML=list.slice(0,6).map(p=>`
   <article class="card">
@@ -1673,7 +1756,7 @@ async function addProperty(){
   const missing=[];
   if(!document.getElementById("oGov").value) missing.push("المحافظة");
   const isInst=document.getElementById("oTx").value==="installment";
-  const inst=isInst?readInstallmentForm():null;
+  const inst=isInst?readInstallmentForm("i"):null;
   if(isInst){
     if(!inst.developer) missing.push("المطور العقاري");
     if(!inst.contractPrice) missing.push("السعر الأصلي بالعقد");
@@ -1704,7 +1787,8 @@ async function addProperty(){
   try{
     const result=await window.ENW_DB.submitProperty(payload, ownerImagesBuffer.map(x=>x.file));
     const imageFailed=!!result?.imageError;
-    ["oName","oPhone","oSize","oPrice","oTitle","oDesc","iDeveloper","iContract","iPaid","iRemaining","iAmount","iCount","iNext","iLast","iFees","iDeliveryDate","iTerms"].forEach(f=>{const el=document.getElementById(f); if(el) el.value="";});
+    ["oName","oPhone","oSize","oPrice","oTitle","oDesc"].forEach(f=>{const el=document.getElementById(f); if(el) el.value="";});
+    fillInstallmentForm("i",{});
     document.getElementById("oTx").value="sale"; toggleInstallmentFields();
     if(!imageFailed) clearOwnerImages();
     setInlineStatus("ownerSubmitStatus",imageFailed
@@ -2125,7 +2209,12 @@ function openEditProperty(id){
   document.getElementById("editPropertyId").value=id;
   document.getElementById("editTitle").value=p.title||"";
   document.getElementById("editDescription").value=p.description||"";
-  document.getElementById("editTx").value=p.tx||"sale";
+  const recovered=!p.installment?parseInstallmentFromDescription(p.description):null;
+  const instData=p.installment||recovered;
+  document.getElementById("editTx").value=instData?"installment":(p.tx||"sale");
+  fillInstallmentForm("ei",instData||{});
+  if(recovered) document.getElementById("editDescription").value=(p.description||"").split(INST_MARK)[0].trim();
+  toggleEditInstallment();
   document.getElementById("editKind").value=p.kind||"residential";
   setTypeOptions("editType",p.kind||"residential",false);
   document.getElementById("editType").value=p.type||((p.kind==="admin")?"مقر إداري":(p.kind==="commercial"?"محل تجاري":"شقة"));
@@ -2151,6 +2240,10 @@ async function savePropertyEdits(){
   const size=Number(document.getElementById("editSize").value);
   const price=Number(document.getElementById("editPrice").value);
   if(!title||!size||!price){ alert("العنوان والمساحة والسعر بيانات مطلوبة."); return; }
+  if(document.getElementById("editTx").value==="installment"){
+    const ii=readInstallmentForm("ei");
+    if(!ii.developer||!ii.contractPrice||!ii.paid){ alert("في التنازل بالتقسيط: المطور والسعر الأصلي بالعقد والمدفوع بيانات مطلوبة."); return; }
+  }
   const st=document.getElementById("editPropertyStatus");
   st.style.display="block"; st.textContent="جار حفظ التعديلات…";
   try{
@@ -2162,7 +2255,8 @@ async function savePropertyEdits(){
       ...p,
       title,
       description:document.getElementById("editDescription").value.trim(),
-      tx:document.getElementById("editTx").value,
+      tx:document.getElementById("editTx").value==="installment"?"sale":document.getElementById("editTx").value,
+      installment:document.getElementById("editTx").value==="installment"?readInstallmentForm("ei"):null,
       kind:document.getElementById("editKind").value,
       governorate:document.getElementById("editGov").value||"القاهرة",
       area:document.getElementById("editArea").value||"",
