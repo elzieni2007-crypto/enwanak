@@ -269,6 +269,13 @@ footer{padding-bottom:90px !important}
 @media(max-width:420px){.header-add{padding:10px 12px !important;font-size:13.5px !important}.brand-logo{width:40px;height:40px}.brand{gap:6px}.brand-mark{font-size:22px}.brand-mark span{letter-spacing:3px}}
 @media(max-width:420px){.nav{gap:8px}.nav-actions{gap:6px}.hamburger{width:38px;height:38px}}
 @media(max-width:370px){.header-add{padding:9px 10px !important;font-size:12.5px !important}.brand-mark{font-size:19px}.brand-mark span{font-size:9px;letter-spacing:2px}.brand-logo{width:36px;height:36px}}
+/* V8.20 show whole photo (ads/posters are not cropped) with a blurred fill behind */
+.photo,.property-gallery{position:relative;overflow:hidden;background-image:var(--img)!important;background-size:contain!important;background-repeat:no-repeat!important;background-position:center!important;background-color:#08131f}
+.photo::before,.property-gallery::before{content:"";position:absolute;inset:-20px;background:var(--img) center/cover no-repeat;filter:blur(22px) brightness(.45);z-index:0}
+.photo::after,.property-gallery::after{content:"";position:absolute;inset:0;height:auto;background:var(--img) center/contain no-repeat;z-index:0}
+.photo>*{position:absolute;z-index:1}
+.property-gallery{min-height:0!important;height:min(72vh,560px)}
+@media(max-width:760px){.property-gallery{height:auto;aspect-ratio:1/1}}
 /* V8.12 mobile polish */
 @media (max-width: 760px){
   .hero-copy{padding-top:18px}
@@ -440,7 +447,7 @@ footer{padding-bottom:90px !important}
   </div>
   <div class="shell footer-row">
     <div style="display:flex;align-items:center;gap:12px"><img src="logo-192.png" alt="" width="48" height="48" style="border-radius:50%"><span><b style="color:#fff">عنوانك ENWANAK</b> — عقارات من المالك مباشرة في مصر · تواصل معنا: <a class="link-gold" href="mailto:enwanakegypt@gmail.com">enwanakegypt@gmail.com</a></span></div>
-    <div dir="ltr">ENWANAK is a digital real estate platform by <b style="color:#d8b46a">ZAD Digital and Business Solutions</b> · V8.20</div>
+    <div dir="ltr">ENWANAK is a digital real estate platform by <b style="color:#d8b46a">ZAD Digital and Business Solutions</b> · V8.21</div>
   </div>
 </footer>
 
@@ -1662,7 +1669,7 @@ function renderProperties(){
   document.getElementById("resultCount").textContent=`${list.length} عقار مطابق`;
   document.getElementById("cards").innerHTML=list.slice(0,6).map(p=>`
   <article class="card">
-    <div class="photo" style="background-image:url('${p.img||ENW_PLACEHOLDER}')">
+    <div class="photo" style="--img:url('${p.img||ENW_PLACEHOLDER}')">
       <span class="tag ${statusClass(p.status)}">${statusLabel(p.status)}</span>
       ${p.installment?'<span class="tag inst-tag">تقسيط · تنازل</span>':''}
       <button class="heart">♡</button>
@@ -2069,7 +2076,7 @@ async function createDeal(){
 }
 
 function setGalleryImage(el,src){
-  document.getElementById("pdMainImg").style.backgroundImage=`url('${src}')`;
+  document.getElementById("pdMainImg").style.setProperty("--img",`url('${src}')`);
   el.parentElement.querySelectorAll(".thumb").forEach(t=>t.classList.remove("active"));
   el.classList.add("active");
 }
@@ -2081,7 +2088,7 @@ function openProperty(id){
   document.getElementById("propertyDetailBody").innerHTML=`
     <div class="property-detail-grid">
       <div>
-        <div class="property-gallery" id="pdMainImg" style="background-image:url('${gallery[0]}')"></div>
+        <div class="property-gallery" id="pdMainImg" style="--img:url('${gallery[0]}')"></div>
         ${gallery.length>1?`<div class="gallery-strip">${gallery.map((src,i)=>`<div class="thumb${i===0?' active':''}" style="background-image:url('${src}')" onclick="setGalleryImage(this,'${src}')"></div>`).join("")}</div>`:""}
       </div>
       <div class="property-summary">
