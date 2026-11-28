@@ -343,6 +343,7 @@ footer{padding-bottom:90px !important}
             <button data-value="residential" onclick="toggleSegment(this,'kindSegment')">سكني</button>
             <button data-value="admin" onclick="toggleSegment(this,'kindSegment')">إداري</button>
             <button data-value="commercial" onclick="toggleSegment(this,'kindSegment')">تجاري</button>
+            <button data-value="land" onclick="toggleSegment(this,'kindSegment')">أراضي</button>
           </div>
         </div>
         <div class="search-grid">
@@ -439,7 +440,7 @@ footer{padding-bottom:90px !important}
   </div>
   <div class="shell footer-row">
     <div style="display:flex;align-items:center;gap:12px"><img src="logo-192.png" alt="" width="48" height="48" style="border-radius:50%"><span><b style="color:#fff">عنوانك ENWANAK</b> — عقارات من المالك مباشرة في مصر · تواصل معنا: <a class="link-gold" href="mailto:enwanakegypt@gmail.com">enwanakegypt@gmail.com</a></span></div>
-    <div dir="ltr">ENWANAK is a digital real estate platform by <b style="color:#d8b46a">ZAD Digital and Business Solutions</b> · V8.19</div>
+    <div dir="ltr">ENWANAK is a digital real estate platform by <b style="color:#d8b46a">ZAD Digital and Business Solutions</b> · V8.20</div>
   </div>
 </footer>
 
@@ -453,7 +454,7 @@ footer{padding-bottom:90px !important}
     <div class="field"><label>اسم المالك <b style="color:#f4d28a">*</b></label><input id="oName" required></div>
     <div class="field"><label>رقم الموبايل <b style="color:#f4d28a">*</b></label><input id="oPhone" required></div>
     <div class="field"><label>بيع / إيجار</label><select id="oTx" onchange="toggleInstallmentFields()"><option value="sale">بيع</option><option value="rent">إيجار</option><option value="installment">تنازل / إعادة بيع بالتقسيط</option></select></div>
-    <div class="field"><label>التصنيف</label><select id="oKind"><option value="residential">سكني</option><option value="admin">إداري</option><option value="commercial">تجاري</option></select></div>
+    <div class="field"><label>التصنيف</label><select id="oKind"><option value="residential">سكني</option><option value="admin">إداري</option><option value="commercial">تجاري</option><option value="land">أراضي</option></select></div>
     <div class="field"><label>المحافظة</label><select id="oGov"></select></div>
     <div class="field"><label>المنطقة / المدينة</label><select id="oArea" data-allow-custom="1"></select></div>
     <div class="field"><label>نوع العقار</label><select id="oType"><option>شقة</option><option>فيلا</option><option>دوبلكس</option><option>بنتهاوس</option><option>مقر إداري</option></select></div>
@@ -491,7 +492,7 @@ footer{padding-bottom:90px !important}
       <select id="rTx"><option value="sale">شراء</option><option value="installment">شراء وحدة بالتقسيط (تنازل)</option><option value="rent">إيجار</option></select>
     </div>
     <div class="field"><label>التصنيف</label>
-      <select id="rKind"><option value="residential">سكني</option><option value="admin">إداري</option><option value="commercial">تجاري</option></select>
+      <select id="rKind"><option value="residential">سكني</option><option value="admin">إداري</option><option value="commercial">تجاري</option><option value="land">أراضي</option></select>
     </div>
 
     <div class="field"><label>المحافظة</label><select id="rGov"></select></div>
@@ -644,7 +645,7 @@ footer{padding-bottom:90px !important}
     <div class="field"><label>من تاريخ</label><input id="reportFrom" type="date" onchange="renderReports()"></div>
     <div class="field"><label>إلى تاريخ</label><input id="reportTo" type="date" onchange="renderReports()"></div>
     <div class="field"><label>المحافظة</label><select id="reportGov" onchange="renderReports()"></select></div>
-    <div class="field"><label>نوع الوحدة</label><select id="reportKind" onchange="renderReports()"><option value="">الكل</option><option value="residential">سكني</option><option value="admin">إداري</option><option value="commercial">تجاري</option></select></div>
+    <div class="field"><label>نوع الوحدة</label><select id="reportKind" onchange="renderReports()"><option value="">الكل</option><option value="residential">سكني</option><option value="admin">إداري</option><option value="commercial">تجاري</option><option value="land">أراضي</option></select></div>
     <div class="field"><label>نوع العملية</label><select id="reportTx" onchange="renderReports()"><option value="">الكل</option><option value="sale">بيع</option><option value="installment">تنازل بالتقسيط</option><option value="rent">إيجار</option></select></div>
     <div class="field"><label>حالة الصفقة</label><select id="reportStatus" onchange="renderReports()"><option value="">الكل</option><option value="sold">تم البيع</option><option value="rented">تم التأجير</option><option value="reserved">محجوز</option><option value="contract">تحت التعاقد</option></select></div>
   </div>
@@ -683,7 +684,7 @@ footer{padding-bottom:90px !important}
   <div class="form-grid">
     <div class="field"><label>عنوان الإعلان</label><input id="editTitle"></div>
     <div class="field"><label>بيع / إيجار</label><select id="editTx" onchange="toggleEditInstallment()"><option value="sale">بيع</option><option value="rent">إيجار</option><option value="installment">تنازل / إعادة بيع بالتقسيط</option></select></div>
-    <div class="field"><label>التصنيف</label><select id="editKind" onchange="setTypeOptions('editType',this.value,false)"><option value="residential">سكني</option><option value="admin">إداري</option><option value="commercial">تجاري</option></select></div>
+    <div class="field"><label>التصنيف</label><select id="editKind" onchange="setTypeOptions('editType',this.value,false)"><option value="residential">سكني</option><option value="admin">إداري</option><option value="commercial">تجاري</option><option value="land">أراضي</option></select></div>
     <div class="field"><label>المحافظة</label><select id="editGov" onchange="refillEditAreas()"></select></div>
     <div class="field"><label>المنطقة / المدينة</label><select id="editArea" data-allow-custom="1"></select></div>
     <div class="field"><label>نوع العقار</label><select id="editType"><option>شقة</option><option>فيلا</option><option>دوبلكس</option><option>بنتهاوس</option><option>مقر إداري</option><option>محل تجاري</option></select></div>
@@ -1261,10 +1262,11 @@ function currentValue(segmentId){return document.querySelector(`#${segmentId} bu
 function setTypeOptions(selectId, kind, includeAny=true){
   const el=document.getElementById(selectId); if(!el) return;
   const current=el.value;
-  const residential=["شقة","فيلا","دوبلكس","بنتهاوس","منزل مستقل","عمارة","أرض مباني","وحدة سكنية أخرى"];
+  const residential=["شقة","فيلا","دوبلكس","بنتهاوس","منزل مستقل","عمارة","وحدة سكنية أخرى"];
   const admin=["مقر إداري","مكتب إداري","وحدة إدارية"];
-  const commercial=["محل تجاري","وحدة تجارية","معرض","مخزن","أرض زراعية"];
-  const items=kind==="residential"?residential:kind==="admin"?admin:kind==="commercial"?commercial:[...residential,...admin,...commercial];
+  const commercial=["محل تجاري","وحدة تجارية","معرض","مخزن"];
+  const land=["أرض مباني","أرض زراعية"];
+  const items=kind==="residential"?residential:kind==="admin"?admin:kind==="commercial"?commercial:kind==="land"?land:[...residential,...admin,...commercial,...land];
   el.innerHTML=(includeAny?`<option value="">${selectId==="typeSelect"?"كل الأنواع":"أي نوع"}</option>`:"")+items.map(x=>`<option>${x}</option>`).join("");
   if(items.includes(current)) el.value=current;
 }
@@ -2096,7 +2098,7 @@ function openProperty(id){
           <div class="detail-item"><span>المساحة</span><b>${p.size} م²</b></div>
           <div class="detail-item"><span>النوع</span><b>${esc(p.type)}</b></div>
           <div class="detail-item"><span>الغرض</span><b>${p.installment?"تنازل بالتقسيط":p.tx==="sale"?"بيع":"إيجار"}</b></div>
-          <div class="detail-item"><span>التصنيف</span><b>${p.kind==="admin"?"إداري":p.kind==="commercial"?"تجاري":"سكني"}</b></div>
+          <div class="detail-item"><span>التصنيف</span><b>${p.kind==="admin"?"إداري":p.kind==="commercial"?"تجاري":p.kind==="land"?"أراضي":"سكني"}</b></div>
         </div>
         ${p.description?`<div class="detail-item" style="margin-top:12px"><span>تفاصيل الإعلان</span><b style="white-space:pre-wrap;line-height:1.9;font-weight:600">${esc(p.description)}</b></div>`:`<div class="note" style="margin-top:12px">لا توجد تفاصيل إضافية مسجلة لهذا الإعلان.</div>`}
         <div class="owner">✓ مالك مباشر — رقم المالك غير معروض للعامة</div>
@@ -2232,7 +2234,7 @@ function openEditProperty(id){
   toggleEditInstallment();
   document.getElementById("editKind").value=p.kind||"residential";
   setTypeOptions("editType",p.kind||"residential",false);
-  document.getElementById("editType").value=p.type||((p.kind==="admin")?"مقر إداري":(p.kind==="commercial"?"محل تجاري":"شقة"));
+  document.getElementById("editType").value=p.type||((p.kind==="admin")?"مقر إداري":(p.kind==="commercial"?"محل تجاري":p.kind==="land"?"أرض مباني":"شقة"));
   document.getElementById("editSize").value=p.size||"";
   document.getElementById("editPrice").value=p.price||"";
   document.getElementById("editStatus").value=p.status||"available";
@@ -2337,7 +2339,7 @@ async function deletePublishedProperty(id){
 }
 
 function submissionTxLabel(v){ return v==="rent"?"إيجار":"بيع"; }
-function submissionKindLabel(v){ return v==="admin"?"إداري":v==="commercial"?"تجاري":"سكني"; }
+function submissionKindLabel(v){ return v==="admin"?"إداري":v==="commercial"?"تجاري":v==="land"?"أراضي":"سكني"; }
 
 function openSubmissionReview(id){
   const sub=pendingSubmissions.find(x=>(x._docId||x.submissionId)===id); if(!sub)return;
@@ -2569,7 +2571,7 @@ function renderReports(){
         <td>${d.propertyId}</td>
         <td>${d.governorate||p.governorate||"القاهرة"}</td>
         <td>${d.area||p.area||""}</td>
-        <td>${d.unitType||p.type||""} — ${kind==="admin"?"إداري":kind==="commercial"?"تجاري":"سكني"}</td>
+        <td>${d.unitType||p.type||""} — ${kind==="admin"?"إداري":kind==="commercial"?"تجاري":kind==="land"?"أراضي":"سكني"}</td>
         <td>${tx==="sale"?"بيع":"إيجار"}</td>
         <td>${d.client||""}</td>
         <td>${money(finalPrice)} ج.م</td>
